@@ -1,0 +1,62 @@
+[
+  {
+    "road_id": "KOL-001",
+    "road_name": "VIP Road",
+    "location": "Kolkata, West Bengal",
+    "damage_type": "pothole",
+    "severity": "critical",
+    "risk_score": 96,
+    "traffic_level": "high",
+    "nearby_school": true,
+    "school_distance_m": 180,
+    "detected_at": "2026-08-21T18:30:00"
+  },
+  {
+    "road_id": "KOL-002",
+    "road_name": "EM Bypass",
+    "location": "Kolkata, West Bengal",
+    "damage_type": "crack",
+    "severity": "severe",
+    "risk_score": 88,
+    "traffic_level": "high",
+    "nearby_school": true,
+    "school_distance_m": 320,
+    "detected_at": "2026-08-21T17:45:00"
+  },
+  {
+    "road_id": "KOL-003",
+    "road_name": "Jessore Road",
+    "location": "Kolkata, West Bengal",
+    "damage_type": "pothole",
+    "severity": "moderate",
+    "risk_score": 67,
+    "traffic_level": "medium",
+    "nearby_school": false,
+    "school_distance_m": null,
+    "detected_at": "2026-08-21T16:20:00"
+  },
+  {
+    "road_id": "KOL-004",
+    "road_name": "BT Road",
+    "location": "Kolkata, West Bengal",
+    "damage_type": "pothole",
+    "severity": "severe",
+    "risk_score": 91,
+    "traffic_level": "high",
+    "nearby_school": true,
+    "school_distance_m": 150,
+    "detected_at": "2026-08-21T15:50:00"
+  },
+  {
+    "road_id": "HOW-001",
+    "road_name": "GT Road",
+    "location": "Howrah, West Bengal",
+    "damage_type": "crack",
+    "severity": "moderate",
+    "risk_score": 64,
+    "traffic_level": "medium",
+    "nearby_school": true,
+    "school_distance_m": 420,
+    "detected_at": "2026-08-21T14:35:00"
+  }
+]
