@@ -1,4 +1,4 @@
-from groq_client import client
+from .groq_client import client
 
 
 def generate_response(prompt: str) -> str:

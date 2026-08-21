@@ -1,4 +1,4 @@
-from ai_service import generate_response
+from .ai_service import generate_response
 
 
 SYSTEM_PROMPT = """
