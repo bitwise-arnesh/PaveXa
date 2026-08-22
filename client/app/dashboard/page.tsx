@@ -5,6 +5,7 @@ import {
   MapPin,
   TriangleAlert,
 } from "lucide-react";
+import Link from "next/link";
 
 import { requireSession } from "@/lib/auth-guard";
 import { ReportButton } from "@/components/report/report-button";
@@ -15,32 +16,27 @@ import { desc, eq } from "drizzle-orm";
 export default async function DashboardPage() {
   const session = await requireSession();
 
-  // Get this user's reports from database
   const reports = await db
     .select()
     .from(report)
     .where(eq(report.userId, session.user.id))
     .orderBy(desc(report.createdAt));
 
-  // Statistics
   const totalReports = reports.length;
 
   const underReview = reports.filter(
-    (report) => report.status === "UNDER_REVIEW"
+    (item) => item.status === "UNDER_REVIEW"
   ).length;
 
   const resolved = reports.filter(
-    (report) => report.status === "RESOLVED"
+    (item) => item.status === "RESOLVED"
   ).length;
 
-  // Only show latest 5 reports
   const recentReports = reports.slice(0, 5);
 
   return (
     <main className="min-h-screen bg-background">
       <div className="mx-auto max-w-7xl px-6 py-10 lg:px-8">
-
-        {/* Header */}
         <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
@@ -60,10 +56,7 @@ export default async function DashboardPage() {
           <ReportButton />
         </div>
 
-        {/* Statistics */}
         <div className="mt-10 grid gap-4 sm:grid-cols-3">
-
-          {/* Total */}
           <div className="rounded-xl border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">
@@ -78,7 +71,6 @@ export default async function DashboardPage() {
             </p>
           </div>
 
-          {/* Under Review */}
           <div className="rounded-xl border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">
@@ -93,7 +85,6 @@ export default async function DashboardPage() {
             </p>
           </div>
 
-          {/* Resolved */}
           <div className="rounded-xl border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">
@@ -107,15 +98,10 @@ export default async function DashboardPage() {
               {String(resolved).padStart(2, "0")}
             </p>
           </div>
-
         </div>
 
-        {/* Reports */}
         <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_320px]">
-
-          {/* Recent reports */}
           <section className="rounded-xl border border-border bg-card shadow-sm">
-
             <div className="flex items-center justify-between border-b border-border px-6 py-5">
               <div>
                 <h2 className="font-semibold">
@@ -129,7 +115,6 @@ export default async function DashboardPage() {
             </div>
 
             <div className="divide-y divide-border">
-
               {recentReports.length === 0 ? (
                 <div className="px-6 py-12 text-center">
                   <MapPin className="mx-auto h-8 w-8 text-muted-foreground" />
@@ -144,12 +129,12 @@ export default async function DashboardPage() {
                 </div>
               ) : (
                 recentReports.map((item) => (
-                  <div
+                  <Link
                     key={item.id}
-                    className="flex items-center justify-between gap-4 px-6 py-5"
+                    href={`/report/${item.id}`}
+                    className="flex items-center justify-between gap-4 px-6 py-5 transition-colors hover:bg-muted/40"
                   >
                     <div className="flex items-start gap-3">
-
                       <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted">
                         <MapPin className="h-4 w-4" />
                       </div>
@@ -160,13 +145,12 @@ export default async function DashboardPage() {
                         </p>
 
                         <p className="mt-1 text-xs text-muted-foreground">
-                          {item.latitude.toFixed(4)},{" "}
-                          {item.longitude.toFixed(4)}
+                          {item.latitude.toFixed(7)},{" "}
+                          {item.longitude.toFixed(7)}
                           {" · "}
                           {item.createdAt.toLocaleDateString()}
                         </p>
                       </div>
-
                     </div>
 
                     <span
@@ -178,19 +162,14 @@ export default async function DashboardPage() {
                     >
                       {item.status.replaceAll("_", " ")}
                     </span>
-
-                  </div>
+                  </Link>
                 ))
               )}
-
             </div>
           </section>
 
-          {/* Quick Action */}
           <aside className="space-y-4">
-
             <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                 Quick action
               </p>
@@ -208,11 +187,9 @@ export default async function DashboardPage() {
                 variant="link"
                 className="mt-5"
               />
-
             </div>
 
             <div className="rounded-xl border border-border bg-muted/40 p-6">
-
               <div className="flex items-center gap-2">
                 <TriangleAlert className="h-4 w-4" />
 
@@ -225,11 +202,8 @@ export default async function DashboardPage() {
                 Your reports help authorities identify and prioritize
                 infrastructure problems faster.
               </p>
-
             </div>
-
           </aside>
-
         </div>
       </div>
     </main>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowUpRight, Plus } from "lucide-react";
 import { ReportModal } from "./report-modal";
 
@@ -14,6 +15,12 @@ export function ReportButton({
   className = "",
 }: ReportButtonProps) {
   const [open, setOpen] = useState(false);
+  const router = useRouter();
+
+  const handleClose = () => {
+    setOpen(false);
+    router.refresh();
+  };
 
   return (
     <>
@@ -39,7 +46,7 @@ export function ReportButton({
 
       <ReportModal
         open={open}
-        onClose={() => setOpen(false)}
+        onClose={handleClose}
       />
     </>
   );

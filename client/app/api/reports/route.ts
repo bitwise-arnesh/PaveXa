@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
+import { mkdir, writeFile, unlink } from "fs/promises";
+import path from "path";
 
 import { auth } from "@/lib/auth";
 import { db } from "@/db";
@@ -109,6 +111,8 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  let savedImagePath: string | null = null;
+
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -121,33 +125,24 @@ export async function POST(request: Request) {
       );
     }
 
-    const body = await request.json();
+    const formData = await request.formData();
 
-    console.log(
-      "REPORT REQUEST BODY:",
-      body,
-    );
-
-    const {
-      latitude,
-      longitude,
-      damageType,
-      confidence,
-      riskScore,
-      riskLevel,
-      infrastructureRisk,
-      gis,
-      description,
-      imageUrl,
-    } = body;
+    const latitude = formData.get("latitude");
+    const longitude = formData.get("longitude");
+    const damageType = formData.get("damageType");
+    const confidence = formData.get("confidence");
+    const riskScore = formData.get("riskScore");
+    const riskLevel = formData.get("riskLevel");
+    const infrastructureRisk =
+      formData.get("infrastructureRisk");
+    const gis = formData.get("gis");
+    const description = formData.get("description");
+    const image = formData.get("image");
 
     if (
-      latitude === undefined ||
       latitude === null ||
-      longitude === undefined ||
       longitude === null ||
       !damageType ||
-      riskScore === undefined ||
       riskScore === null ||
       !riskLevel
     ) {
@@ -159,9 +154,76 @@ export async function POST(request: Request) {
       );
     }
 
+    if (!(image instanceof File)) {
+      return NextResponse.json(
+        {
+          error: "Report image is required",
+        },
+        { status: 400 },
+      );
+    }
+
+    if (!image.type.startsWith("image/")) {
+      return NextResponse.json(
+        {
+          error: "Invalid image file",
+        },
+        { status: 400 },
+      );
+    }
+
+    if (image.size > 10 * 1024 * 1024) {
+      return NextResponse.json(
+        {
+          error: "Image is too large",
+        },
+        { status: 400 },
+      );
+    }
+
     const reportId = `RD-${Date.now()}-${Math.random()
       .toString(36)
       .slice(2, 8)}`;
+
+    const extension =
+      image.type === "image/png"
+        ? "png"
+        : image.type === "image/webp"
+          ? "webp"
+          : "jpg";
+
+    const uploadDirectory = path.join(
+      process.cwd(),
+      "public",
+      "uploads",
+    );
+
+    await mkdir(uploadDirectory, {
+      recursive: true,
+    });
+
+    const fileName = `${reportId}.${extension}`;
+
+    const absoluteImagePath = path.join(
+      uploadDirectory,
+      fileName,
+    );
+
+    const imageBuffer = Buffer.from(
+      await image.arrayBuffer(),
+    );
+
+    await writeFile(
+      absoluteImagePath,
+      imageBuffer,
+    );
+
+    savedImagePath = absoluteImagePath;
+
+    const gisData =
+      typeof gis === "string" && gis
+        ? gis
+        : null;
 
     const [newReport] = await db
       .insert(report)
@@ -176,7 +238,6 @@ export async function POST(request: Request) {
         damageType: String(damageType),
 
         confidence:
-          confidence !== undefined &&
           confidence !== null
             ? Number(confidence)
             : null,
@@ -185,26 +246,18 @@ export async function POST(request: Request) {
         riskLevel: String(riskLevel),
 
         infrastructureRisk:
-          infrastructureRisk !== undefined &&
           infrastructureRisk !== null
             ? Number(infrastructureRisk)
             : null,
 
-        infrastructureData:
-          gis !== undefined &&
-          gis !== null
-            ? JSON.stringify(gis)
-            : null,
+        infrastructureData: gisData,
 
         description:
           description
             ? String(description)
             : null,
 
-        imageUrl:
-          imageUrl
-            ? String(imageUrl)
-            : null,
+        imageUrl: `/uploads/${fileName}`,
 
         status: "UNDER_REVIEW",
       })
@@ -223,6 +276,12 @@ export async function POST(request: Request) {
       { status: 201 },
     );
   } catch (error) {
+    if (savedImagePath) {
+      try {
+        await unlink(savedImagePath);
+      } catch {}
+    }
+
     console.error(
       "CREATE REPORT ERROR:",
       error,

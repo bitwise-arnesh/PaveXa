@@ -1,7 +1,6 @@
 import httpx
 import math
 
-
 OVERPASS_URL = "https://overpass-api.de/api/interpreter"
 
 
@@ -42,14 +41,11 @@ def distance_to_segment(
     end_lat: float,
     end_lon: float,
 ) -> float:
-
     lat_scale = 111320
 
     lon_scale = (
         111320
-        * math.cos(
-            math.radians(point_lat)
-        )
+        * math.cos(math.radians(point_lat))
     )
 
     px = point_lon * lon_scale
@@ -77,10 +73,7 @@ def distance_to_segment(
         + (py - ay) * dy
     ) / length_squared
 
-    t = max(
-        0.0,
-        min(1.0, t),
-    )
+    t = max(0.0, min(1.0, t))
 
     closest_x = ax + t * dx
     closest_y = ay + t * dy
@@ -96,14 +89,12 @@ def distance_to_road(
     longitude: float,
     geometry: list,
 ):
-
     if not geometry or len(geometry) < 2:
         return None
 
     minimum = None
 
     for i in range(len(geometry) - 1):
-
         start = geometry[i]
         end = geometry[i + 1]
 
@@ -127,7 +118,6 @@ async def get_nearby_infrastructure(
     longitude: float,
     radius: int = 500,
 ):
-
     query = f"""
     [out:json][timeout:15];
 
@@ -179,40 +169,22 @@ async def get_nearby_infrastructure(
     }
 
     try:
-
         async with httpx.AsyncClient(
             timeout=25,
             headers=headers,
         ) as client:
-
             response = await client.post(
                 OVERPASS_URL,
-                data={
-                    "data": query,
-                },
+                data={"data": query},
             )
 
             response.raise_for_status()
-
             data = response.json()
 
     except httpx.HTTPStatusError as error:
-
-        print(
-            "\n================================="
-        )
         print("GIS / OVERPASS HTTP ERROR")
-        print("=================================")
-
-        print(
-            "Status:",
-            error.response.status_code,
-        )
-
-        print(
-            "Response:",
-            error.response.text[:500],
-        )
+        print("Status:", error.response.status_code)
+        print("Response:", error.response.text[:500])
 
         return {
             "available": False,
@@ -224,14 +196,7 @@ async def get_nearby_infrastructure(
         }
 
     except Exception as error:
-
-        print(
-            "\n================================="
-        )
         print("GIS / OVERPASS ERROR")
-        print("================================="
-        )
-
         print(error)
 
         return {
@@ -243,10 +208,7 @@ async def get_nearby_infrastructure(
             "nearby": [],
         }
 
-    elements = data.get(
-        "elements",
-        []
-    )
+    elements = data.get("elements", [])
 
     counts = {
         "schools": 0,
@@ -275,26 +237,16 @@ async def get_nearby_infrastructure(
     }
 
     nearby = []
-
     road_names = set()
 
     for element in elements:
-
-        tags = element.get(
-            "tags",
-            {}
-        )
+        tags = element.get("tags", {})
 
         lat = element.get("lat")
         lon = element.get("lon")
 
         if lat is None or lon is None:
-
-            center = element.get(
-                "center",
-                {}
-            )
-
+            center = element.get("center", {})
             lat = center.get("lat")
             lon = center.get("lon")
 
@@ -311,59 +263,43 @@ async def get_nearby_infrastructure(
         amenity = tags.get("amenity")
         highway = tags.get("highway")
         railway = tags.get("railway")
-
-        name = tags.get(
-            "name",
-            "Unnamed"
-        )
+        name = tags.get("name")
 
         infrastructure_type = "other"
 
         if amenity == "school":
-
             counts["schools"] += 1
             infrastructure_type = "school"
 
         elif amenity == "hospital":
-
             counts["hospitals"] += 1
             infrastructure_type = "hospital"
 
         elif amenity == "clinic":
-
             counts["clinics"] += 1
             infrastructure_type = "clinic"
 
         elif amenity == "fire_station":
-
             counts["fire_stations"] += 1
             infrastructure_type = "fire_station"
 
         elif amenity == "police":
-
             counts["police_stations"] += 1
             infrastructure_type = "police"
 
         elif highway == "bus_stop":
-
             counts["bus_stops"] += 1
             infrastructure_type = "bus_stop"
 
         elif highway == "traffic_signals":
-
             counts["traffic_signals"] += 1
             infrastructure_type = "traffic_signal"
 
         elif highway == "crossing":
-
             counts["crossings"] += 1
             infrastructure_type = "crossing"
 
-        elif railway in [
-            "station",
-            "halt",
-        ]:
-
+        elif railway in ["station", "halt"]:
             counts["railway_stations"] += 1
             infrastructure_type = "railway_station"
 
@@ -372,104 +308,48 @@ async def get_nearby_infrastructure(
             "secondary",
             "tertiary",
         ]:
+            if not name or not name.strip():
+                continue
 
-            counts["major_roads"] += 1
             infrastructure_type = "major_road"
-
-            if name != "Unnamed":
-                road_names.add(name)
+            road_names.add(name.strip())
 
         if infrastructure_type in nearest:
-
-            current = nearest[
-                infrastructure_type
-            ]
+            current = nearest[infrastructure_type]
 
             if (
                 current is None
-                or distance
-                < current["distance_m"]
+                or distance < current["distance_m"]
             ):
-
-                nearest[
-                    infrastructure_type
-                ] = {
-                    "name": name,
-                    "distance_m": round(
-                        distance,
-                        2
-                    ),
+                nearest[infrastructure_type] = {
+                    "name": name or "Unnamed",
+                    "distance_m": round(distance, 2),
                     "latitude": lat,
                     "longitude": lon,
-                    "osm_id": element.get(
-                        "id"
-                    ),
+                    "osm_id": element.get("id"),
                 }
 
         nearby.append(
             {
                 "type": infrastructure_type,
-                "name": name,
-                "distance_m": round(
-                    distance,
-                    2
-                ),
+                "name": name or "Unnamed",
+                "distance_m": round(distance, 2),
                 "latitude": lat,
                 "longitude": lon,
-                "osm_id": element.get(
-                    "id"
-                ),
+                "osm_id": element.get("id"),
             }
         )
 
-    counts["major_roads"] = len(
-        road_names
-    )
+    counts["major_roads"] = len(road_names)
 
     nearby.sort(
-        key=lambda item:
-        item["distance_m"]
+        key=lambda item: item["distance_m"]
     )
 
-    print(
-        "\n================================="
-    )
     print("OPENSTREETMAP ANALYSIS")
-    print("=================================")
-
-    print(
-        "Location:",
-        latitude,
-        longitude,
-    )
-
-    print(
-        "Radius:",
-        radius,
-        "meters"
-    )
-
-    print(
-        "Infrastructure:",
-        counts
-    )
-
-    print(
-        "Nearest:"
-    )
-
-    for key, value in nearest.items():
-
-        if value:
-            print(
-                f"  {key}: "
-                f"{value['name']} "
-                f"({value['distance_m']} m)"
-            )
-
-    print(
-        "=================================\n"
-    )
+    print("Location:", latitude, longitude)
+    print("Radius:", radius, "meters")
+    print("Infrastructure:", counts)
 
     return {
         "available": True,

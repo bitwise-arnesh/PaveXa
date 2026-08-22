@@ -1,12 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import {
-  ImagePlus,
-  Loader2,
-  MapPin,
-  X,
-} from "lucide-react";
+import { ImagePlus, Loader2, MapPin, X } from "lucide-react";
 import { toast } from "sonner";
 
 interface ReportModalProps {
@@ -38,6 +33,7 @@ interface InfrastructureResult {
   available?: boolean;
   radius?: number;
   counts?: Record<string, number>;
+
   nearest?: Record<
     string,
     {
@@ -48,6 +44,7 @@ interface InfrastructureResult {
       osm_id?: number;
     } | null
   >;
+
   nearby?: {
     type: string;
     name: string;
@@ -69,25 +66,27 @@ interface DetectionResponse {
 
 interface ReportResponse {
   message?: string;
+
   report?: {
     id: string;
     riskScore?: number;
     riskLevel?: string;
     infrastructureRisk?: number;
     infrastructureData?: string | null;
+    imageUrl?: string | null;
   };
+
   risk?: RiskResult;
   error?: string;
 }
 
-export function ReportModal({
-  open,
-  onClose,
-}: ReportModalProps) {
+export function ReportModal({ open, onClose }: ReportModalProps) {
   const [image, setImage] = useState<File | null>(null);
+
   const [preview, setPreview] = useState<string | null>(null);
 
   const [latitude, setLatitude] = useState("");
+
   const [longitude, setLongitude] = useState("");
 
   const [description, setDescription] = useState("");
@@ -95,7 +94,9 @@ export function ReportModal({
   const [loading, setLoading] = useState(false);
 
   const [detections, setDetections] = useState<Detection[]>([]);
+
   const [risk, setRisk] = useState<RiskResult | null>(null);
+
   const [infrastructure, setInfrastructure] =
     useState<InfrastructureResult | null>(null);
 
@@ -104,9 +105,12 @@ export function ReportModal({
   const resetForm = () => {
     setImage(null);
     setPreview(null);
+
     setLatitude("");
     setLongitude("");
+
     setDescription("");
+
     setDetections([]);
     setRisk(null);
     setInfrastructure(null);
@@ -119,31 +123,31 @@ export function ReportModal({
     onClose();
   };
 
-  const handleImage = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleImage = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
 
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
       toast.error("Invalid image", {
-        description:
-          "Please select a valid image file.",
+        description: "Please select a valid image file.",
       });
+
       return;
     }
 
     if (file.size > 10 * 1024 * 1024) {
       toast.error("Image is too large", {
-        description:
-          "Please choose an image smaller than 10 MB.",
+        description: "Please choose an image smaller than 10 MB.",
       });
+
       return;
     }
 
     setImage(file);
+
     setPreview(URL.createObjectURL(file));
+
     setDetections([]);
     setRisk(null);
     setInfrastructure(null);
@@ -152,58 +156,64 @@ export function ReportModal({
   const handleLocation = () => {
     if (!navigator.geolocation) {
       toast.error("Location unavailable", {
-        description:
-          "Geolocation is not supported by your browser.",
+        description: "Geolocation is not supported by your browser.",
       });
+
       return;
     }
 
+    toast.loading("Getting accurate location...", {
+      id: "location",
+    });
+
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        setLatitude(
-          position.coords.latitude.toString(),
-        );
+        const { latitude, longitude, accuracy } = position.coords;
 
-        setLongitude(
-          position.coords.longitude.toString(),
-        );
+        setLatitude(String(latitude));
+        setLongitude(String(longitude));
 
         toast.success("Location detected", {
-          description:
-            "Your current coordinates have been added.",
+          id: "location",
+          description: `Accuracy approximately ${Math.round(accuracy)} meters.`,
         });
       },
-      () => {
+
+      (error) => {
         toast.error("Unable to get your location", {
+          id: "location",
+
           description:
-            "Please allow location access or enter the coordinates manually.",
+            error.code === 1
+              ? "Please allow location access."
+              : "Please try again or enter the coordinates manually.",
         });
       },
+
       {
         enableHighAccuracy: true,
-        timeout: 10000,
+        timeout: 20000,
+        maximumAge: 0,
       },
     );
   };
 
-  const handleSubmit = async (
-    event: FormEvent<HTMLFormElement>,
-  ) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!image) {
       toast.error("Image required", {
-        description:
-          "Please upload a road image.",
+        description: "Please upload a road image.",
       });
+
       return;
     }
 
     if (!latitude || !longitude) {
       toast.error("Location required", {
-        description:
-          "Please provide the road location.",
+        description: "Please provide the road location.",
       });
+
       return;
     }
 
@@ -219,251 +229,182 @@ export function ReportModal({
       lon > 180
     ) {
       toast.error("Invalid location", {
-        description:
-          "Please enter valid latitude and longitude.",
+        description: "Please enter valid latitude and longitude.",
       });
+
       return;
     }
 
     setLoading(true);
+
     setDetections([]);
     setRisk(null);
     setInfrastructure(null);
 
     try {
-      const apiUrl =
-        process.env.NEXT_PUBLIC_API_URL ||
-        "http://localhost:8000";
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
       const reportCountResponse = await fetch(
         `/api/reports?latitude=${lat}&longitude=${lon}&radius=500`,
       );
 
       if (!reportCountResponse.ok) {
-        throw new Error(
-          "Failed to calculate nearby report count.",
-        );
+        throw new Error("Failed to calculate nearby report count.");
       }
 
-      const reportCountData =
-        await reportCountResponse.json();
+      const reportCountData = await reportCountResponse.json();
 
-      const reportCount =
-        Number(reportCountData.count) || 0;
+      const reportCount = Number(reportCountData.count) || 0;
 
-      console.log(
-        "PREVIOUS REPORT COUNT:",
-        reportCount,
-      );
+      console.log("PREVIOUS REPORT COUNT:", reportCount);
 
-      const formData = new FormData();
+      const detectionFormData = new FormData();
 
-      formData.append("image", image);
-      formData.append("latitude", latitude);
-      formData.append("longitude", longitude);
-      formData.append(
-        "report_count",
-        reportCount.toString(),
-      );
+      detectionFormData.append("image", image);
 
-      const detectionResponse = await fetch(
-        `${apiUrl}/api/detect`,
-        {
-          method: "POST",
-          body: formData,
-        },
-      );
+      detectionFormData.append("latitude", latitude);
+
+      detectionFormData.append("longitude", longitude);
+
+      detectionFormData.append("report_count", reportCount.toString());
+
+      const detectionResponse = await fetch(`${apiUrl}/api/detect`, {
+        method: "POST",
+        body: detectionFormData,
+      });
 
       let detectionData: DetectionResponse;
 
       try {
-        detectionData =
-          await detectionResponse.json();
+        detectionData = await detectionResponse.json();
       } catch {
-        throw new Error(
-          "The backend returned an invalid response.",
-        );
+        throw new Error("The backend returned an invalid response.");
       }
 
       if (!detectionResponse.ok) {
-        throw new Error(
-          detectionData.detail ||
-            "Failed to analyze the image.",
-        );
+        throw new Error(detectionData.detail || "Failed to analyze the image.");
       }
 
-      const result =
-        detectionData.detections ?? [];
+      const result = detectionData.detections ?? [];
 
       if (result.length === 0) {
-        toast.error(
-          "No road damage detected",
-          {
-            description:
-              "The model found no road damage, so the report was not saved.",
-          },
-        );
+        toast.error("No road damage detected", {
+          description:
+            "The model found no road damage, so the report was not saved.",
+        });
+
         return;
       }
 
-      const primaryDetection =
-        [...result].sort(
-          (a, b) =>
-            b.confidence - a.confidence,
-        )[0];
+      const primaryDetection = [...result].sort(
+        (a, b) => b.confidence - a.confidence,
+      )[0];
 
       setDetections(result);
 
-      const gisResult =
-        detectionData.gis ?? null;
+      const gisResult = detectionData.gis ?? null;
 
       setInfrastructure(gisResult);
 
-      const calculatedRisk =
-        detectionData.risk;
+      const calculatedRisk = detectionData.risk;
 
       if (!calculatedRisk) {
-        throw new Error(
-          "Risk calculation was not returned by the backend.",
-        );
+        throw new Error("Risk calculation was not returned by the backend.");
       }
 
       setRisk(calculatedRisk);
 
       const infrastructureRisk =
-        calculatedRisk.breakdown
-          ?.infrastructure_risk ?? 0;
+        calculatedRisk.breakdown?.infrastructure_risk ?? 0;
 
-      console.log(
-        "GIS RESULT:",
-        gisResult,
-      );
+      console.log("GIS RESULT:", gisResult);
 
-      console.log(
-        "INFRASTRUCTURE RISK:",
-        infrastructureRisk,
-      );
+      console.log("INFRASTRUCTURE RISK:", infrastructureRisk);
 
       console.log(
         "REPORT DENSITY:",
-        calculatedRisk.breakdown
-          ?.report_density ?? 0,
+        calculatedRisk.breakdown?.report_density ?? 0,
       );
 
-      console.log(
-        "FINAL RISK:",
-        calculatedRisk,
+      console.log("FINAL RISK:", calculatedRisk);
+
+      const reportFormData = new FormData();
+
+      reportFormData.append("latitude", latitude);
+
+      reportFormData.append("longitude", longitude);
+
+      reportFormData.append("damageType", primaryDetection.type);
+
+      reportFormData.append(
+        "confidence",
+        primaryDetection.confidence.toString(),
       );
 
-      const reportResponse = await fetch(
-        "/api/reports",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-          body: JSON.stringify({
-            latitude: lat,
-            longitude: lon,
+      reportFormData.append("riskScore", calculatedRisk.risk_score.toString());
 
-            damageType:
-              primaryDetection.type,
+      reportFormData.append("riskLevel", calculatedRisk.risk_level);
 
-            confidence:
-              primaryDetection.confidence,
-
-            riskScore:
-              calculatedRisk.risk_score,
-
-            riskLevel:
-              calculatedRisk.risk_level,
-
-            infrastructureRisk,
-
-            gis: gisResult,
-
-            description:
-              description.trim() || null,
-
-            imageUrl: null,
-          }),
-        },
+      reportFormData.append(
+        "infrastructureRisk",
+        infrastructureRisk.toString(),
       );
+
+      reportFormData.append("gis", JSON.stringify(gisResult));
+
+      reportFormData.append("description", description.trim());
+
+      reportFormData.append("image", image);
+
+      const reportResponse = await fetch("/api/reports", {
+        method: "POST",
+        body: reportFormData,
+      });
 
       let reportData: ReportResponse;
 
       try {
-        reportData =
-          await reportResponse.json();
+        reportData = await reportResponse.json();
       } catch {
-        throw new Error(
-          "The database API returned an invalid response.",
-        );
+        throw new Error("The database API returned an invalid response.");
       }
 
       if (!reportResponse.ok) {
-        throw new Error(
-          reportData.error ||
-            "Failed to save the report.",
-        );
+        throw new Error(reportData.error || "Failed to save the report.");
       }
 
-      if (reportData.risk) {
-        setRisk(reportData.risk);
-      }
+      console.log("SAVED REPORT:", reportData.report);
 
-      console.log(
-        "SAVED REPORT:",
-        reportData.report,
-      );
-
-      toast.success(
-        "Report submitted",
-        {
-          description:
-            `Risk ${calculatedRisk.risk_level} · Score ${calculatedRisk.risk_score}`,
-        },
-      );
+      toast.success("Report submitted", {
+        description: `Risk ${calculatedRisk.risk_level} · Score ${calculatedRisk.risk_score}`,
+      });
 
       setTimeout(() => {
         handleClose();
       }, 1000);
     } catch (error) {
-      console.error(
-        "Report submission error:",
-        error,
-      );
+      console.error("Report submission error:", error);
 
-      toast.error(
-        "Unable to submit report",
-        {
-          description:
-            error instanceof Error
-              ? error.message
-              : "Could not complete the report.",
-        },
-      );
+      toast.error("Unable to submit report", {
+        description:
+          error instanceof Error
+            ? error.message
+            : "Could not complete the report.",
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const infrastructureCounts =
-    infrastructure?.counts ?? {};
+  const infrastructureCounts = infrastructure?.counts ?? {};
 
-  const nearby =
-    infrastructure?.nearby ?? [];
+  const nearby = infrastructure?.nearby ?? [];
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
       onMouseDown={(event) => {
-        if (
-          event.target ===
-            event.currentTarget &&
-          !loading
-        ) {
+        if (event.target === event.currentTarget && !loading) {
           handleClose();
         }
       }}
@@ -471,9 +412,7 @@ export function ReportModal({
       <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-xl border border-border bg-background shadow-2xl">
         <div className="flex items-start justify-between border-b border-border px-6 py-5">
           <div>
-            <h2 className="text-lg font-semibold">
-              Report road damage
-            </h2>
+            <h2 className="text-lg font-semibold">Report road damage</h2>
 
             <p className="mt-1 text-sm text-muted-foreground">
               Upload a photo and location for analysis.
@@ -490,14 +429,10 @@ export function ReportModal({
           </button>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-5 p-6"
-        >
+        <form onSubmit={handleSubmit} className="space-y-5 p-6">
+          {/* Image */}
           <div>
-            <label className="mb-2 block text-sm font-medium">
-              Road image
-            </label>
+            <label className="mb-2 block text-sm font-medium">Road image</label>
 
             <label className="relative flex min-h-40 cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-dashed border-border bg-muted/30 transition hover:bg-muted/50">
               {preview ? (
@@ -512,9 +447,7 @@ export function ReportModal({
                     <ImagePlus className="h-5 w-5 text-muted-foreground" />
                   </div>
 
-                  <p className="text-sm font-medium">
-                    Choose an image
-                  </p>
+                  <p className="text-sm font-medium">Choose an image</p>
 
                   <p className="text-xs text-muted-foreground">
                     JPG, PNG or WEBP · Max 10 MB
@@ -538,11 +471,10 @@ export function ReportModal({
             )}
           </div>
 
+          {/* Location */}
           <div>
             <div className="mb-2 flex items-center justify-between">
-              <label className="text-sm font-medium">
-                Location
-              </label>
+              <label className="text-sm font-medium">Location</label>
 
               <button
                 type="button"
@@ -557,31 +489,28 @@ export function ReportModal({
 
             <div className="grid gap-3 sm:grid-cols-2">
               <input
-                type="number"
-                step="any"
+                type="text"
+                inputMode="decimal"
                 placeholder="Latitude"
                 value={latitude}
-                onChange={(e) =>
-                  setLatitude(e.target.value)
-                }
+                onChange={(e) => setLatitude(e.target.value)}
                 disabled={loading}
                 className="h-11 rounded-md border border-input bg-background px-3 text-sm outline-none transition focus:ring-2 focus:ring-foreground/10"
               />
 
               <input
-                type="number"
-                step="any"
+                type="text"
+                inputMode="decimal"
                 placeholder="Longitude"
                 value={longitude}
-                onChange={(e) =>
-                  setLongitude(e.target.value)
-                }
+                onChange={(e) => setLongitude(e.target.value)}
                 disabled={loading}
                 className="h-11 rounded-md border border-input bg-background px-3 text-sm outline-none transition focus:ring-2 focus:ring-foreground/10"
               />
             </div>
           </div>
 
+          {/* Description */}
           <div>
             <label className="mb-2 block text-sm font-medium">
               Description
@@ -593,57 +522,43 @@ export function ReportModal({
             <textarea
               rows={3}
               value={description}
-              onChange={(e) =>
-                setDescription(e.target.value)
-              }
+              onChange={(e) => setDescription(e.target.value)}
               disabled={loading}
               placeholder="Describe the road damage..."
               className="w-full resize-none rounded-md border border-input bg-background px-3 py-2.5 text-sm outline-none transition focus:ring-2 focus:ring-foreground/10"
             />
           </div>
 
+          {/* Detections */}
           {detections.length > 0 && (
             <div className="rounded-lg border border-border bg-muted/40 p-4">
-              <p className="text-sm font-semibold">
-                Detected damage
-              </p>
+              <p className="text-sm font-semibold">Detected damage</p>
 
               <div className="mt-3 space-y-2">
-                {detections.map(
-                  (detection, index) => (
-                    <div
-                      key={`${detection.type}-${index}`}
-                      className="flex items-center justify-between text-sm"
-                    >
-                      <span className="capitalize">
-                        {detection.type}
-                      </span>
+                {detections.map((detection, index) => (
+                  <div
+                    key={`${detection.type}-${index}`}
+                    className="flex items-center justify-between text-sm"
+                  >
+                    <span className="capitalize">{detection.type}</span>
 
-                      <span className="font-medium">
-                        {(
-                          detection.confidence *
-                          100
-                        ).toFixed(1)}
-                        %
-                      </span>
-                    </div>
-                  ),
-                )}
+                    <span className="font-medium">
+                      {(detection.confidence * 100).toFixed(1)}%
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           )}
 
+          {/* Infrastructure */}
           {infrastructure && (
             <div className="rounded-lg border border-border bg-muted/40 p-4">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold">
-                  Nearby infrastructure
-                </p>
+                <p className="text-sm font-semibold">Nearby infrastructure</p>
 
                 <span className="text-xs text-muted-foreground">
-                  {infrastructure.radius ??
-                    500}{" "}
-                  m
+                  {infrastructure.radius ?? 500} m
                 </span>
               </div>
 
@@ -651,64 +566,56 @@ export function ReportModal({
                 <div className="rounded-md bg-background p-2">
                   Schools
                   <span className="float-right font-medium">
-                    {infrastructureCounts.schools ??
-                      0}
+                    {infrastructureCounts.schools ?? 0}
                   </span>
                 </div>
 
                 <div className="rounded-md bg-background p-2">
                   Hospitals
                   <span className="float-right font-medium">
-                    {infrastructureCounts.hospitals ??
-                      0}
+                    {infrastructureCounts.hospitals ?? 0}
                   </span>
                 </div>
 
                 <div className="rounded-md bg-background p-2">
                   Clinics
                   <span className="float-right font-medium">
-                    {infrastructureCounts.clinics ??
-                      0}
+                    {infrastructureCounts.clinics ?? 0}
                   </span>
                 </div>
 
                 <div className="rounded-md bg-background p-2">
                   Bus stops
                   <span className="float-right font-medium">
-                    {infrastructureCounts.bus_stops ??
-                      0}
+                    {infrastructureCounts.bus_stops ?? 0}
                   </span>
                 </div>
 
                 <div className="rounded-md bg-background p-2">
                   Railway
                   <span className="float-right font-medium">
-                    {infrastructureCounts.railway_stations ??
-                      0}
+                    {infrastructureCounts.railway_stations ?? 0}
                   </span>
                 </div>
 
                 <div className="rounded-md bg-background p-2">
                   Major roads
                   <span className="float-right font-medium">
-                    {infrastructureCounts.major_roads ??
-                      0}
+                    {infrastructureCounts.major_roads ?? 0}
                   </span>
                 </div>
 
                 <div className="rounded-md bg-background p-2">
                   Police
                   <span className="float-right font-medium">
-                    {infrastructureCounts.police_stations ??
-                      0}
+                    {infrastructureCounts.police_stations ?? 0}
                   </span>
                 </div>
 
                 <div className="rounded-md bg-background p-2">
                   Fire stations
                   <span className="float-right font-medium">
-                    {infrastructureCounts.fire_stations ??
-                      0}
+                    {infrastructureCounts.fire_stations ?? 0}
                   </span>
                 </div>
               </div>
@@ -719,41 +626,30 @@ export function ReportModal({
                     Nearest
                   </p>
 
-                  {nearby
-                    .slice(0, 5)
-                    .map(
-                      (item, index) => (
-                        <div
-                          key={`${item.osm_id ?? item.name}-${index}`}
-                          className="flex items-center justify-between gap-3 text-xs"
-                        >
-                          <span className="truncate capitalize">
-                            {item.name !==
-                            "Unnamed"
-                              ? item.name
-                              : item.type}
-                          </span>
+                  {nearby.slice(0, 5).map((item, index) => (
+                    <div
+                      key={`${item.osm_id ?? item.name}-${index}`}
+                      className="flex items-center justify-between gap-3 text-xs"
+                    >
+                      <span className="truncate capitalize">
+                        {item.name !== "Unnamed" ? item.name : item.type}
+                      </span>
 
-                          <span className="shrink-0 text-muted-foreground">
-                            {
-                              item.distance_m
-                            }{" "}
-                            m
-                          </span>
-                        </div>
-                      ),
-                    )}
+                      <span className="shrink-0 text-muted-foreground">
+                        {item.distance_m} m
+                      </span>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
           )}
 
+          {/* Risk */}
           {risk && (
             <div className="rounded-lg border border-border bg-muted/40 p-4">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold">
-                  Risk assessment
-                </p>
+                <p className="text-sm font-semibold">Risk assessment</p>
 
                 <span className="rounded-full bg-background px-2.5 py-1 text-xs font-semibold">
                   {risk.risk_level}
@@ -772,51 +668,38 @@ export function ReportModal({
 
               {risk.breakdown && (
                 <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-                  {risk.breakdown
-                    .infrastructure_risk !==
-                    undefined && (
+                  {risk.breakdown.infrastructure_risk !== undefined && (
                     <div className="rounded-md bg-background p-2">
                       Infrastructure
                       <span className="float-right font-medium">
-                        {
-                          risk.breakdown
-                            .infrastructure_risk
-                        }
+                        {risk.breakdown.infrastructure_risk}
                       </span>
                     </div>
                   )}
 
-                  {risk.breakdown
-                    .report_density !==
-                    undefined && (
+                  {risk.breakdown.report_density !== undefined && (
                     <div className="rounded-md bg-background p-2">
                       Previous reports
                       <span className="float-right font-medium">
-                        {
-                          risk.breakdown
-                            .report_density
-                        }
+                        {risk.breakdown.report_density}
                       </span>
                     </div>
                   )}
                 </div>
               )}
 
-              {risk.nearby_report_count !==
-                undefined && (
+              {risk.nearby_report_count !== undefined && (
                 <p className="mt-3 text-xs text-muted-foreground">
-                  Previous reports within
-                  500 m:{" "}
+                  Previous reports within 500 m:{" "}
                   <span className="font-medium text-foreground">
-                    {
-                      risk.nearby_report_count
-                    }
+                    {risk.nearby_report_count}
                   </span>
                 </p>
               )}
             </div>
           )}
 
+          {/* Buttons */}
           <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <button
               type="button"
@@ -832,13 +715,9 @@ export function ReportModal({
               disabled={loading}
               className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-foreground px-5 text-sm font-semibold text-background transition hover:-translate-y-0.5 hover:shadow-md disabled:pointer-events-none disabled:opacity-60"
             >
-              {loading && (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              )}
+              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
 
-              {loading
-                ? "Analyzing..."
-                : "Analyze report"}
+              {loading ? "Analyzing..." : "Analyze report"}
             </button>
           </div>
         </form>
