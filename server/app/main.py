@@ -1,6 +1,7 @@
 from fastapi import FastAPI
+from pydantic import BaseModel
 
-from app.routes.detection import router as detection_router
+from ai.agent import run_agent
 
 
 app = FastAPI(
@@ -10,13 +11,14 @@ app = FastAPI(
 )
 
 
-app.include_router(detection_router)
+class ChatRequest(BaseModel):
+    prompt: str
 
 
 @app.get("/")
 def root():
     return {
-        "message": "PaveXa API is running",
+        "message": "PaveXa API is running online",
         "status": "online"
     }
 
@@ -25,4 +27,13 @@ def root():
 def health():
     return {
         "status": "healthy"
+    }
+
+
+@app.post("/api/ai/chat")
+def ai_chat(request: ChatRequest):
+    response = run_agent(request.prompt)
+
+    return {
+        "response": response
     }
