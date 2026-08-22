@@ -1,61 +1,46 @@
 import {
   Activity,
-  ArrowUpRight,
   CheckCircle2,
   Clock3,
   MapPin,
-  Plus,
   TriangleAlert,
 } from "lucide-react";
 
 import { requireSession } from "@/lib/auth-guard";
 import { ReportButton } from "@/components/report/report-button";
-
-const stats = [
-  {
-    label: "Reports submitted",
-    value: "08",
-    icon: Activity,
-  },
-  {
-    label: "Under review",
-    value: "03",
-    icon: Clock3,
-  },
-  {
-    label: "Resolved",
-    value: "05",
-    icon: CheckCircle2,
-  },
-];
-
-const recentReports = [
-  {
-    location: "Salt Lake Road",
-    type: "Pothole",
-    status: "Under review",
-    date: "Today",
-  },
-  {
-    location: "Park Street",
-    type: "Road damage",
-    status: "Resolved",
-    date: "Yesterday",
-  },
-  {
-    location: "EM Bypass",
-    type: "Broken road sign",
-    status: "Under review",
-    date: "Aug 19",
-  },
-];
+import { db } from "@/db";
+import { report } from "@/db/schemas/schema";
+import { desc, eq } from "drizzle-orm";
 
 export default async function DashboardPage() {
   const session = await requireSession();
 
+  // Get this user's reports from database
+  const reports = await db
+    .select()
+    .from(report)
+    .where(eq(report.userId, session.user.id))
+    .orderBy(desc(report.createdAt));
+
+  // Statistics
+  const totalReports = reports.length;
+
+  const underReview = reports.filter(
+    (report) => report.status === "UNDER_REVIEW"
+  ).length;
+
+  const resolved = reports.filter(
+    (report) => report.status === "RESOLVED"
+  ).length;
+
+  // Only show latest 5 reports
+  const recentReports = reports.slice(0, 5);
+
   return (
     <main className="min-h-screen bg-background">
       <div className="mx-auto max-w-7xl px-6 py-10 lg:px-8">
+
+        {/* Header */}
         <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
@@ -75,33 +60,62 @@ export default async function DashboardPage() {
           <ReportButton />
         </div>
 
+        {/* Statistics */}
         <div className="mt-10 grid gap-4 sm:grid-cols-3">
-          {stats.map((stat) => {
-            const Icon = stat.icon;
 
-            return (
-              <div
-                key={stat.label}
-                className="rounded-xl border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">
-                    {stat.label}
-                  </span>
+          {/* Total */}
+          <div className="rounded-xl border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">
+                Reports submitted
+              </span>
 
-                  <Icon className="h-4 w-4 text-muted-foreground" />
-                </div>
+              <Activity className="h-4 w-4 text-muted-foreground" />
+            </div>
 
-                <p className="mt-4 text-3xl font-semibold tracking-tight">
-                  {stat.value}
-                </p>
-              </div>
-            );
-          })}
+            <p className="mt-4 text-3xl font-semibold tracking-tight">
+              {String(totalReports).padStart(2, "0")}
+            </p>
+          </div>
+
+          {/* Under Review */}
+          <div className="rounded-xl border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">
+                Under review
+              </span>
+
+              <Clock3 className="h-4 w-4 text-muted-foreground" />
+            </div>
+
+            <p className="mt-4 text-3xl font-semibold tracking-tight">
+              {String(underReview).padStart(2, "0")}
+            </p>
+          </div>
+
+          {/* Resolved */}
+          <div className="rounded-xl border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">
+                Resolved
+              </span>
+
+              <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
+            </div>
+
+            <p className="mt-4 text-3xl font-semibold tracking-tight">
+              {String(resolved).padStart(2, "0")}
+            </p>
+          </div>
+
         </div>
 
+        {/* Reports */}
         <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_320px]">
+
+          {/* Recent reports */}
           <section className="rounded-xl border border-border bg-card shadow-sm">
+
             <div className="flex items-center justify-between border-b border-border px-6 py-5">
               <div>
                 <h2 className="font-semibold">
@@ -112,50 +126,71 @@ export default async function DashboardPage() {
                   Your latest infrastructure submissions.
                 </p>
               </div>
-
-              <button className="text-sm font-medium text-muted-foreground transition hover:text-foreground">
-                View all
-              </button>
             </div>
 
             <div className="divide-y divide-border">
-              {recentReports.map((report) => (
-                <div
-                  key={`${report.location}-${report.date}`}
-                  className="flex items-center justify-between gap-4 px-6 py-5"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted">
-                      <MapPin className="h-4 w-4" />
-                    </div>
 
-                    <div>
-                      <p className="text-sm font-medium">
-                        {report.type}
-                      </p>
+              {recentReports.length === 0 ? (
+                <div className="px-6 py-12 text-center">
+                  <MapPin className="mx-auto h-8 w-8 text-muted-foreground" />
 
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {report.location} · {report.date}
-                      </p>
-                    </div>
-                  </div>
+                  <p className="mt-3 text-sm font-medium">
+                    No reports yet
+                  </p>
 
-                  <span
-                    className={
-                      report.status === "Resolved"
-                        ? "rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400"
-                        : "rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-600 dark:text-amber-400"
-                    }
-                  >
-                    {report.status}
-                  </span>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Submit your first road damage report.
+                  </p>
                 </div>
-              ))}
+              ) : (
+                recentReports.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between gap-4 px-6 py-5"
+                  >
+                    <div className="flex items-start gap-3">
+
+                      <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted">
+                        <MapPin className="h-4 w-4" />
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-medium capitalize">
+                          {item.damageType.replaceAll("_", " ")}
+                        </p>
+
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {item.latitude.toFixed(4)},{" "}
+                          {item.longitude.toFixed(4)}
+                          {" · "}
+                          {item.createdAt.toLocaleDateString()}
+                        </p>
+                      </div>
+
+                    </div>
+
+                    <span
+                      className={
+                        item.status === "RESOLVED"
+                          ? "rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400"
+                          : "rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-600 dark:text-amber-400"
+                      }
+                    >
+                      {item.status.replaceAll("_", " ")}
+                    </span>
+
+                  </div>
+                ))
+              )}
+
             </div>
           </section>
 
+          {/* Quick Action */}
           <aside className="space-y-4">
+
             <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                 Quick action
               </p>
@@ -173,9 +208,11 @@ export default async function DashboardPage() {
                 variant="link"
                 className="mt-5"
               />
+
             </div>
 
             <div className="rounded-xl border border-border bg-muted/40 p-6">
+
               <div className="flex items-center gap-2">
                 <TriangleAlert className="h-4 w-4" />
 
@@ -188,8 +225,11 @@ export default async function DashboardPage() {
                 Your reports help authorities identify and prioritize
                 infrastructure problems faster.
               </p>
+
             </div>
+
           </aside>
+
         </div>
       </div>
     </main>

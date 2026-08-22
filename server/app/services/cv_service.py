@@ -1,17 +1,32 @@
+from io import BytesIO
+from pathlib import Path
+
 from fastapi import UploadFile
+from PIL import Image
+from ultralytics import YOLO
+
+from app.risk_engine.yolo_adapter import convert_yolo_detections
+
+
+MODEL_PATH = (
+    Path(__file__).resolve().parents[3]
+    / "ai"
+    / "models"
+    / "yolo12m_5class_40epochs_best.pt"
+)
+
+model = YOLO(str(MODEL_PATH))
 
 
 async def detect_damage(image: UploadFile) -> dict:
-    """
-    actual YOLOv8/RDD2022 CV service.
-    """
+    contents = await image.read()
+
+    pil_image = Image.open(BytesIO(contents)).convert("RGB")
+
+    results = model(pil_image)
+
+    detections = convert_yolo_detections(results)
 
     return {
-        "detections": [
-            {
-                "type": "pothole",
-                "confidence": 0.91,
-                "bbox": [120, 180, 430, 390]
-            }
-        ]
+        "detections": detections
     }

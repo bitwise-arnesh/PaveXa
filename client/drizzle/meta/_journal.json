@@ -15,6 +15,27 @@
       "when": 1787378440883,
       "tag": "0001_spicy_prowler",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1787409608613,
+      "tag": "0002_reflective_imperial_guard",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1787410551785,
+      "tag": "0003_cold_khan",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1787413623390,
+      "tag": "0004_late_revanche",
+      "breakpoints": true
     }
   ]
 }

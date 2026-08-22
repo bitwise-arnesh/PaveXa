@@ -17,6 +17,67 @@ interface ReportModalProps {
 interface Detection {
   type: string;
   confidence: number;
+  bbox?: number[];
+}
+
+interface RiskBreakdown {
+  infrastructure_risk?: number;
+  report_density?: number;
+}
+
+interface RiskResult {
+  risk_score: number;
+  risk_level: string;
+  breakdown?: RiskBreakdown;
+  infrastructure_risk?: number;
+  report_density_risk?: number;
+  nearby_report_count?: number;
+}
+
+interface InfrastructureResult {
+  available?: boolean;
+  radius?: number;
+  counts?: Record<string, number>;
+  nearest?: Record<
+    string,
+    {
+      name: string;
+      distance_m: number;
+      latitude: number;
+      longitude: number;
+      osm_id?: number;
+    } | null
+  >;
+  nearby?: {
+    type: string;
+    name: string;
+    distance_m: number;
+    latitude: number;
+    longitude: number;
+    osm_id?: number;
+  }[];
+}
+
+interface DetectionResponse {
+  message?: string;
+  filename?: string;
+  detections?: Detection[];
+  gis?: InfrastructureResult;
+  risk?: RiskResult;
+  detail?: string;
+}
+
+interface ReportResponse {
+  message?: string;
+  report?: {
+    id: string;
+    riskScore?: number;
+    riskLevel?: string;
+    infrastructureRisk?: number;
+    infrastructureData?: string | null;
+  };
+  risk?: RiskResult;
+  error?: string;
 }
 
 export function ReportModal({
@@ -25,11 +86,18 @@ export function ReportModal({
 }: ReportModalProps) {
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
+
   const [description, setDescription] = useState("");
+
   const [loading, setLoading] = useState(false);
+
   const [detections, setDetections] = useState<Detection[]>([]);
+  const [risk, setRisk] = useState<RiskResult | null>(null);
+  const [infrastructure, setInfrastructure] =
+    useState<InfrastructureResult | null>(null);
 
   if (!open) return null;
 
@@ -40,6 +108,8 @@ export function ReportModal({
     setLongitude("");
     setDescription("");
     setDetections([]);
+    setRisk(null);
+    setInfrastructure(null);
   };
 
   const handleClose = () => {
@@ -50,7 +120,7 @@ export function ReportModal({
   };
 
   const handleImage = (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event.target.files?.[0];
 
@@ -58,14 +128,16 @@ export function ReportModal({
 
     if (!file.type.startsWith("image/")) {
       toast.error("Invalid image", {
-        description: "Please select a valid image file.",
+        description:
+          "Please select a valid image file.",
       });
       return;
     }
 
     if (file.size > 10 * 1024 * 1024) {
       toast.error("Image is too large", {
-        description: "Please choose an image smaller than 10 MB.",
+        description:
+          "Please choose an image smaller than 10 MB.",
       });
       return;
     }
@@ -73,6 +145,8 @@ export function ReportModal({
     setImage(file);
     setPreview(URL.createObjectURL(file));
     setDetections([]);
+    setRisk(null);
+    setInfrastructure(null);
   };
 
   const handleLocation = () => {
@@ -86,11 +160,17 @@ export function ReportModal({
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        setLatitude(position.coords.latitude.toString());
-        setLongitude(position.coords.longitude.toString());
+        setLatitude(
+          position.coords.latitude.toString(),
+        );
+
+        setLongitude(
+          position.coords.longitude.toString(),
+        );
 
         toast.success("Location detected", {
-          description: "Your current coordinates have been added.",
+          description:
+            "Your current coordinates have been added.",
         });
       },
       () => {
@@ -102,117 +182,293 @@ export function ReportModal({
       {
         enableHighAccuracy: true,
         timeout: 10000,
-      }
+      },
     );
   };
 
   const handleSubmit = async (
-    event: FormEvent<HTMLFormElement>
+    event: FormEvent<HTMLFormElement>,
   ) => {
     event.preventDefault();
 
     if (!image) {
       toast.error("Image required", {
-        description: "Please upload a road image.",
+        description:
+          "Please upload a road image.",
       });
       return;
     }
 
     if (!latitude || !longitude) {
       toast.error("Location required", {
-        description: "Please provide the road location.",
+        description:
+          "Please provide the road location.",
+      });
+      return;
+    }
+
+    const lat = Number(latitude);
+    const lon = Number(longitude);
+
+    if (
+      !Number.isFinite(lat) ||
+      !Number.isFinite(lon) ||
+      lat < -90 ||
+      lat > 90 ||
+      lon < -180 ||
+      lon > 180
+    ) {
+      toast.error("Invalid location", {
+        description:
+          "Please enter valid latitude and longitude.",
       });
       return;
     }
 
     setLoading(true);
     setDetections([]);
+    setRisk(null);
+    setInfrastructure(null);
 
     try {
-      const formData = new FormData();
-
-      formData.append("image", image);
-
-      // These will be consumed by the backend
-      // when we extend /api/detect.
-      formData.append("latitude", latitude);
-      formData.append("longitude", longitude);
-      formData.append("description", description);
-
       const apiUrl =
         process.env.NEXT_PUBLIC_API_URL ||
         "http://localhost:8000";
 
-      const response = await fetch(
+      const reportCountResponse = await fetch(
+        `/api/reports?latitude=${lat}&longitude=${lon}&radius=500`,
+      );
+
+      if (!reportCountResponse.ok) {
+        throw new Error(
+          "Failed to calculate nearby report count.",
+        );
+      }
+
+      const reportCountData =
+        await reportCountResponse.json();
+
+      const reportCount =
+        Number(reportCountData.count) || 0;
+
+      console.log(
+        "PREVIOUS REPORT COUNT:",
+        reportCount,
+      );
+
+      const formData = new FormData();
+
+      formData.append("image", image);
+      formData.append("latitude", latitude);
+      formData.append("longitude", longitude);
+      formData.append(
+        "report_count",
+        reportCount.toString(),
+      );
+
+      const detectionResponse = await fetch(
         `${apiUrl}/api/detect`,
         {
           method: "POST",
           body: formData,
-        }
+        },
       );
 
-      let data: {
-        message?: string;
-        filename?: string;
-        detections?: Detection[];
-        detail?: string;
-      };
+      let detectionData: DetectionResponse;
 
       try {
-        data = await response.json();
+        detectionData =
+          await detectionResponse.json();
       } catch {
         throw new Error(
-          "The backend returned an invalid response."
+          "The backend returned an invalid response.",
         );
       }
 
-      if (!response.ok) {
+      if (!detectionResponse.ok) {
         throw new Error(
-          data.detail || "Failed to analyze the image."
+          detectionData.detail ||
+            "Failed to analyze the image.",
         );
       }
 
-      const result = data.detections ?? [];
+      const result =
+        detectionData.detections ?? [];
+
+      if (result.length === 0) {
+        toast.error(
+          "No road damage detected",
+          {
+            description:
+              "The model found no road damage, so the report was not saved.",
+          },
+        );
+        return;
+      }
+
+      const primaryDetection =
+        [...result].sort(
+          (a, b) =>
+            b.confidence - a.confidence,
+        )[0];
 
       setDetections(result);
 
-      toast.success("Image analyzed successfully", {
-        description:
-          result.length > 0
-            ? `${result.length} road damage detection${
-                result.length === 1 ? "" : "s"
-              } found.`
-            : "No road damage was detected.",
-      });
+      const gisResult =
+        detectionData.gis ?? null;
 
-      console.log("YOLO response:", data);
+      setInfrastructure(gisResult);
+
+      const calculatedRisk =
+        detectionData.risk;
+
+      if (!calculatedRisk) {
+        throw new Error(
+          "Risk calculation was not returned by the backend.",
+        );
+      }
+
+      setRisk(calculatedRisk);
+
+      const infrastructureRisk =
+        calculatedRisk.breakdown
+          ?.infrastructure_risk ?? 0;
+
+      console.log(
+        "GIS RESULT:",
+        gisResult,
+      );
+
+      console.log(
+        "INFRASTRUCTURE RISK:",
+        infrastructureRisk,
+      );
+
+      console.log(
+        "REPORT DENSITY:",
+        calculatedRisk.breakdown
+          ?.report_density ?? 0,
+      );
+
+      console.log(
+        "FINAL RISK:",
+        calculatedRisk,
+      );
+
+      const reportResponse = await fetch(
+        "/api/reports",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            latitude: lat,
+            longitude: lon,
+
+            damageType:
+              primaryDetection.type,
+
+            confidence:
+              primaryDetection.confidence,
+
+            riskScore:
+              calculatedRisk.risk_score,
+
+            riskLevel:
+              calculatedRisk.risk_level,
+
+            infrastructureRisk,
+
+            gis: gisResult,
+
+            description:
+              description.trim() || null,
+
+            imageUrl: null,
+          }),
+        },
+      );
+
+      let reportData: ReportResponse;
+
+      try {
+        reportData =
+          await reportResponse.json();
+      } catch {
+        throw new Error(
+          "The database API returned an invalid response.",
+        );
+      }
+
+      if (!reportResponse.ok) {
+        throw new Error(
+          reportData.error ||
+            "Failed to save the report.",
+        );
+      }
+
+      if (reportData.risk) {
+        setRisk(reportData.risk);
+      }
+
+      console.log(
+        "SAVED REPORT:",
+        reportData.report,
+      );
+
+      toast.success(
+        "Report submitted",
+        {
+          description:
+            `Risk ${calculatedRisk.risk_level} · Score ${calculatedRisk.risk_score}`,
+        },
+      );
+
+      setTimeout(() => {
+        handleClose();
+      }, 1000);
     } catch (error) {
-      console.error("Report submission error:", error);
+      console.error(
+        "Report submission error:",
+        error,
+      );
 
-      toast.error("Unable to analyze image", {
-        description:
-          error instanceof Error
-            ? error.message
-            : "Could not connect to the PaveXa backend.",
-      });
+      toast.error(
+        "Unable to submit report",
+        {
+          description:
+            error instanceof Error
+              ? error.message
+              : "Could not complete the report.",
+        },
+      );
     } finally {
       setLoading(false);
     }
   };
+
+  const infrastructureCounts =
+    infrastructure?.counts ?? {};
+
+  const nearby =
+    infrastructure?.nearby ?? [];
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
       onMouseDown={(event) => {
         if (
-          event.target === event.currentTarget &&
+          event.target ===
+            event.currentTarget &&
           !loading
         ) {
           handleClose();
         }
       }}
     >
-      <div className="w-full max-w-lg overflow-hidden rounded-xl border border-border bg-background shadow-2xl">
+      <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-xl border border-border bg-background shadow-2xl">
         <div className="flex items-start justify-between border-b border-border px-6 py-5">
           <div>
             <h2 className="text-lg font-semibold">
@@ -238,7 +494,6 @@ export function ReportModal({
           onSubmit={handleSubmit}
           className="space-y-5 p-6"
         >
-          {/* Image */}
           <div>
             <label className="mb-2 block text-sm font-medium">
               Road image
@@ -283,7 +538,6 @@ export function ReportModal({
             )}
           </div>
 
-          {/* Location */}
           <div>
             <div className="mb-2 flex items-center justify-between">
               <label className="text-sm font-medium">
@@ -328,7 +582,6 @@ export function ReportModal({
             </div>
           </div>
 
-          {/* Description */}
           <div>
             <label className="mb-2 block text-sm font-medium">
               Description
@@ -349,7 +602,6 @@ export function ReportModal({
             />
           </div>
 
-          {/* Detection result */}
           {detections.length > 0 && (
             <div className="rounded-lg border border-border bg-muted/40 p-4">
               <p className="text-sm font-semibold">
@@ -357,28 +609,214 @@ export function ReportModal({
               </p>
 
               <div className="mt-3 space-y-2">
-                {detections.map((detection, index) => (
-                  <div
-                    key={`${detection.type}-${index}`}
-                    className="flex items-center justify-between text-sm"
-                  >
-                    <span className="capitalize">
-                      {detection.type}
-                    </span>
+                {detections.map(
+                  (detection, index) => (
+                    <div
+                      key={`${detection.type}-${index}`}
+                      className="flex items-center justify-between text-sm"
+                    >
+                      <span className="capitalize">
+                        {detection.type}
+                      </span>
 
-                    <span className="font-medium">
-                      {(detection.confidence * 100).toFixed(
-                        1
-                      )}
-                      %
-                    </span>
-                  </div>
-                ))}
+                      <span className="font-medium">
+                        {(
+                          detection.confidence *
+                          100
+                        ).toFixed(1)}
+                        %
+                      </span>
+                    </div>
+                  ),
+                )}
               </div>
             </div>
           )}
 
-          {/* Actions */}
+          {infrastructure && (
+            <div className="rounded-lg border border-border bg-muted/40 p-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold">
+                  Nearby infrastructure
+                </p>
+
+                <span className="text-xs text-muted-foreground">
+                  {infrastructure.radius ??
+                    500}{" "}
+                  m
+                </span>
+              </div>
+
+              <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                <div className="rounded-md bg-background p-2">
+                  Schools
+                  <span className="float-right font-medium">
+                    {infrastructureCounts.schools ??
+                      0}
+                  </span>
+                </div>
+
+                <div className="rounded-md bg-background p-2">
+                  Hospitals
+                  <span className="float-right font-medium">
+                    {infrastructureCounts.hospitals ??
+                      0}
+                  </span>
+                </div>
+
+                <div className="rounded-md bg-background p-2">
+                  Clinics
+                  <span className="float-right font-medium">
+                    {infrastructureCounts.clinics ??
+                      0}
+                  </span>
+                </div>
+
+                <div className="rounded-md bg-background p-2">
+                  Bus stops
+                  <span className="float-right font-medium">
+                    {infrastructureCounts.bus_stops ??
+                      0}
+                  </span>
+                </div>
+
+                <div className="rounded-md bg-background p-2">
+                  Railway
+                  <span className="float-right font-medium">
+                    {infrastructureCounts.railway_stations ??
+                      0}
+                  </span>
+                </div>
+
+                <div className="rounded-md bg-background p-2">
+                  Major roads
+                  <span className="float-right font-medium">
+                    {infrastructureCounts.major_roads ??
+                      0}
+                  </span>
+                </div>
+
+                <div className="rounded-md bg-background p-2">
+                  Police
+                  <span className="float-right font-medium">
+                    {infrastructureCounts.police_stations ??
+                      0}
+                  </span>
+                </div>
+
+                <div className="rounded-md bg-background p-2">
+                  Fire stations
+                  <span className="float-right font-medium">
+                    {infrastructureCounts.fire_stations ??
+                      0}
+                  </span>
+                </div>
+              </div>
+
+              {nearby.length > 0 && (
+                <div className="mt-4 space-y-2">
+                  <p className="text-xs font-medium text-muted-foreground">
+                    Nearest
+                  </p>
+
+                  {nearby
+                    .slice(0, 5)
+                    .map(
+                      (item, index) => (
+                        <div
+                          key={`${item.osm_id ?? item.name}-${index}`}
+                          className="flex items-center justify-between gap-3 text-xs"
+                        >
+                          <span className="truncate capitalize">
+                            {item.name !==
+                            "Unnamed"
+                              ? item.name
+                              : item.type}
+                          </span>
+
+                          <span className="shrink-0 text-muted-foreground">
+                            {
+                              item.distance_m
+                            }{" "}
+                            m
+                          </span>
+                        </div>
+                      ),
+                    )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {risk && (
+            <div className="rounded-lg border border-border bg-muted/40 p-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold">
+                  Risk assessment
+                </p>
+
+                <span className="rounded-full bg-background px-2.5 py-1 text-xs font-semibold">
+                  {risk.risk_level}
+                </span>
+              </div>
+
+              <div className="mt-3 flex items-end gap-2">
+                <span className="text-3xl font-semibold tracking-tight">
+                  {risk.risk_score}
+                </span>
+
+                <span className="pb-1 text-xs text-muted-foreground">
+                  / 100
+                </span>
+              </div>
+
+              {risk.breakdown && (
+                <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                  {risk.breakdown
+                    .infrastructure_risk !==
+                    undefined && (
+                    <div className="rounded-md bg-background p-2">
+                      Infrastructure
+                      <span className="float-right font-medium">
+                        {
+                          risk.breakdown
+                            .infrastructure_risk
+                        }
+                      </span>
+                    </div>
+                  )}
+
+                  {risk.breakdown
+                    .report_density !==
+                    undefined && (
+                    <div className="rounded-md bg-background p-2">
+                      Previous reports
+                      <span className="float-right font-medium">
+                        {
+                          risk.breakdown
+                            .report_density
+                        }
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {risk.nearby_report_count !==
+                undefined && (
+                <p className="mt-3 text-xs text-muted-foreground">
+                  Previous reports within
+                  500 m:{" "}
+                  <span className="font-medium text-foreground">
+                    {
+                      risk.nearby_report_count
+                    }
+                  </span>
+                </p>
+              )}
+            </div>
+          )}
+
           <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <button
               type="button"

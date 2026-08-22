@@ -1,7 +1,16 @@
+DAMAGE_TYPE_MAP = {
+    "D00": "longitudinal_crack",
+    "D10": "transverse_crack",
+    "D20": "alligator_crack",
+    "D40": "pothole",
+    "D43": "pothole",
+}
+
+
 def convert_yolo_detections(yolo_results):
     """
-    Convert YOLO detection results into the format
-    expected by the Risk Engine.
+    Convert raw YOLO results into the format
+    expected by the PaveXa risk engine.
     """
 
     detections = []
@@ -16,10 +25,17 @@ def convert_yolo_detections(yolo_results):
             class_id = int(box.cls[0])
             confidence = float(box.conf[0])
 
-            class_name = result.names[class_id]
+            raw_class = result.names[class_id]
+
+            damage_type = DAMAGE_TYPE_MAP.get(
+                raw_class,
+                "unknown"
+            )
 
             detections.append({
-                "type": class_name,
+                "raw_class": raw_class,
+                "damage_type": damage_type,
+                "type": damage_type,
                 "confidence": round(confidence, 4)
             })
 
