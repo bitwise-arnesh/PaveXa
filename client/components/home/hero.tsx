@@ -1,12 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import {
-  ArrowRight,
-  CircleAlert,
-  MapPin,
-  ScanSearch,
-} from "lucide-react";
+import { ArrowRight, CircleAlert, MapPin, ScanSearch } from "lucide-react";
 
 import { ScrollLink } from "@/components/ui/scroll-link";
 
@@ -34,10 +29,6 @@ const heroContainer = {
 export function Hero() {
   return (
     <section className="relative overflow-hidden border-b border-border bg-background">
-      {/* -------------------------------------------------- */}
-      {/* SUBTLE GRID */}
-      {/* -------------------------------------------------- */}
-
       <div
         className="
           pointer-events-none
@@ -53,10 +44,6 @@ export function Hero() {
         }}
       />
 
-      {/* -------------------------------------------------- */}
-      {/* AMBIENT MOTION */}
-      {/* -------------------------------------------------- */}
-
       <motion.div
         className="
           pointer-events-none
@@ -66,9 +53,9 @@ export function Hero() {
           h-96
           w-96
           rounded-full
-          bg-foreground/[0.025]
+          bg-foreground/2.5
           blur-3xl
-          dark:bg-white/[0.025]
+          dark:bg-white/2.5
         "
         animate={{
           x: [0, 20, 0],
@@ -81,10 +68,6 @@ export function Hero() {
         }}
       />
 
-      {/* -------------------------------------------------- */}
-      {/* MAIN CONTENT */}
-      {/* -------------------------------------------------- */}
-
       <div
         className="
           relative
@@ -94,21 +77,16 @@ export function Hero() {
           items-center
           gap-14
           px-6
-          py-24
+          py-20
+          sm:py-24
           lg:grid-cols-[1.05fr_0.95fr]
+          lg:gap-16
           lg:py-32
         "
       >
-        {/* ================================================== */}
-        {/* LEFT CONTENT */}
-        {/* ================================================== */}
-
-        <motion.div
-          variants={heroContainer}
-          initial="hidden"
-          animate="visible"
-        >
+        <motion.div variants={heroContainer} initial="hidden" animate="visible">
           {/* Eyebrow */}
+
           <motion.div
             variants={heroItem}
             className="
@@ -125,6 +103,7 @@ export function Hero() {
               text-xs
               font-medium
               text-muted-foreground
+              backdrop-blur-sm
             "
           >
             <motion.span
@@ -139,11 +118,11 @@ export function Hero() {
                 ease: "easeInOut",
               }}
             />
-
             Infrastructure intelligence platform
           </motion.div>
 
           {/* Heading */}
+
           <motion.h1
             variants={heroItem}
             className="
@@ -160,13 +139,11 @@ export function Hero() {
           >
             Smarter roads.
             <br />
-
-            <span className="text-muted-foreground">
-              Safer communities.
-            </span>
+            <span className="text-muted-foreground">Safer communities.</span>
           </motion.h1>
 
           {/* Description */}
+
           <motion.p
             variants={heroItem}
             className="
@@ -178,19 +155,16 @@ export function Hero() {
               sm:text-lg
             "
           >
-            PaveXa uses computer vision and location intelligence to detect
-            road damage, assess risk, and help authorities prioritize repairs.
+            PaveXa uses computer vision and location intelligence to detect road
+            damage, assess risk, and help authorities prioritize repairs.
           </motion.p>
-
-          {/* ================================================== */}
-          {/* CTA BUTTONS */}
-          {/* ================================================== */}
 
           <motion.div
             variants={heroItem}
             className="mt-9 flex flex-col gap-3 sm:flex-row"
           >
             {/* Get Started */}
+
             <motion.div
               whileHover={{ y: -2 }}
               whileTap={{ scale: 0.98 }}
@@ -205,6 +179,7 @@ export function Hero() {
                 className="
                   group
                   inline-flex
+                  w-full
                   items-center
                   justify-center
                   gap-2
@@ -219,10 +194,10 @@ export function Hero() {
                   transition-all
                   duration-200
                   hover:shadow-md
+                  sm:w-auto
                 "
               >
                 Get started
-
                 <motion.span
                   className="inline-flex"
                   whileHover={{ x: 4 }}
@@ -238,6 +213,7 @@ export function Hero() {
             </motion.div>
 
             {/* How It Works */}
+
             <motion.div
               whileHover={{ y: -2 }}
               whileTap={{ scale: 0.98 }}
@@ -252,6 +228,7 @@ export function Hero() {
                 className="
                   group
                   inline-flex
+                  w-full
                   items-center
                   justify-center
                   gap-2
@@ -269,10 +246,10 @@ export function Hero() {
                   duration-200
                   hover:bg-muted
                   hover:shadow-md
+                  sm:w-auto
                 "
               >
                 How it works
-
                 <ArrowRight
                   className="
                     h-4
@@ -287,10 +264,6 @@ export function Hero() {
               </ScrollLink>
             </motion.div>
           </motion.div>
-
-          {/* ================================================== */}
-          {/* TRUST INDICATORS */}
-          {/* ================================================== */}
 
           <motion.div
             variants={heroItem}
@@ -321,27 +294,13 @@ export function Hero() {
           </motion.div>
         </motion.div>
 
-        {/* ================================================== */}
-        {/* RIGHT VISUALIZATION */}
-        {/* ================================================== */}
-
         <InfrastructurePreview />
       </div>
     </section>
   );
 }
 
-/* ========================================================== */
-/* TRUST ITEM */
-/* ========================================================== */
-
-function TrustItem({
-  icon,
-  text,
-}: {
-  icon: React.ReactNode;
-  text: string;
-}) {
+function TrustItem({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
     <motion.div
       whileHover={{ y: -2 }}
@@ -357,10 +316,6 @@ function TrustItem({
     </motion.div>
   );
 }
-
-/* ========================================================== */
-/* INFRASTRUCTURE PREVIEW */
-/* ========================================================== */
 
 function InfrastructurePreview() {
   return (
@@ -383,6 +338,7 @@ function InfrastructurePreview() {
       className="relative"
     >
       {/* Main card */}
+
       <motion.div
         whileHover={{
           y: -4,
@@ -405,6 +361,7 @@ function InfrastructurePreview() {
         "
       >
         {/* Application header */}
+
         <div
           className="
             flex
@@ -435,22 +392,20 @@ function InfrastructurePreview() {
             </span>
           </div>
 
-          <span className="text-[10px] text-muted-foreground">
-            PAVEXA / AI
-          </span>
+          <span className="text-[10px] text-muted-foreground">PAVEXA / AI</span>
         </div>
 
-        {/* Map */}
-        <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+        <div className="relative aspect-4/3 overflow-hidden bg-muted">
           {/* Roads */}
+
           <div
             className="
               absolute
               left-[15%]
               top-1/2
-              h-[2px]
+              h-0.5
               w-[75%]
-              rotate-[-12deg]
+              -rotate-12
               bg-foreground/20
             "
           />
@@ -461,8 +416,8 @@ function InfrastructurePreview() {
               left-1/2
               top-[5%]
               h-[90%]
-              w-[2px]
-              rotate-[18deg]
+              w-0.5
+              rotate-18
               bg-foreground/20
             "
           />
@@ -472,7 +427,7 @@ function InfrastructurePreview() {
               absolute
               left-[5%]
               top-[35%]
-              h-[2px]
+              h-0.5
               w-[90%]
               rotate-[8deg]
               bg-foreground/10
@@ -480,6 +435,7 @@ function InfrastructurePreview() {
           />
 
           {/* Blocks */}
+
           <MapBlock className="left-[10%] top-[12%] h-16 w-20" />
 
           <MapBlock className="right-[12%] top-[18%] h-20 w-24" />
@@ -489,6 +445,7 @@ function InfrastructurePreview() {
           <MapBlock className="bottom-[10%] right-[15%] h-16 w-20" />
 
           {/* Detection points */}
+
           <DetectionPoint
             className="left-[35%] top-[32%]"
             severity="critical"
@@ -502,12 +459,13 @@ function InfrastructurePreview() {
           />
 
           <DetectionPoint
-            className="left-[48%] bottom-[24%]"
+            className="bottom-[24%] left-[48%]"
             severity="medium"
             delay={0.8}
           />
 
           {/* Detection overlay */}
+
           <motion.div
             initial={{
               opacity: 0,
@@ -545,6 +503,7 @@ function InfrastructurePreview() {
           </motion.div>
 
           {/* Animated scan line */}
+
           <motion.div
             className="
               pointer-events-none
@@ -568,7 +527,6 @@ function InfrastructurePreview() {
           />
         </div>
 
-        {/* Metrics */}
         <div
           className="
             grid
@@ -587,10 +545,6 @@ function InfrastructurePreview() {
     </motion.div>
   );
 }
-
-/* ========================================================== */
-/* MAP BLOCK */
-/* ========================================================== */
 
 function MapBlock({ className }: { className: string }) {
   return (
@@ -615,10 +569,6 @@ function MapBlock({ className }: { className: string }) {
   );
 }
 
-/* ========================================================== */
-/* DETECTION POINT */
-/* ========================================================== */
-
 function DetectionPoint({
   className,
   severity,
@@ -637,6 +587,7 @@ function DetectionPoint({
   return (
     <div className={`absolute ${className}`}>
       {/* Pulse */}
+
       <motion.div
         className={`
           absolute
@@ -658,6 +609,7 @@ function DetectionPoint({
       />
 
       {/* Point */}
+
       <motion.div
         className={`
           relative
@@ -683,17 +635,7 @@ function DetectionPoint({
   );
 }
 
-/* ========================================================== */
-/* METRIC */
-/* ========================================================== */
-
-function Metric({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
+function Metric({ label, value }: { label: string; value: string }) {
   return (
     <motion.div
       whileHover={{
@@ -705,9 +647,7 @@ function Metric({
         {label}
       </p>
 
-      <p className="mt-1 text-sm font-semibold">
-        {value}
-      </p>
+      <p className="mt-1 text-sm font-semibold">{value}</p>
     </motion.div>
   );
 }

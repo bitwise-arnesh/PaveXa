@@ -23,9 +23,6 @@ export function AuthShell({
     <main className="min-h-screen bg-background">
       <div className="grid min-h-screen lg:grid-cols-2">
 
-        {/* ================================================== */}
-        {/* BRANDING SIDE */}
-        {/* ================================================== */}
 
         <section
           className={`
@@ -37,7 +34,7 @@ export function AuthShell({
             text-background
           `}
         >
-          {/* Subtle grid */}
+
           <div
             className="pointer-events-none absolute inset-0 opacity-[0.05]"
             style={{
@@ -47,7 +44,7 @@ export function AuthShell({
             }}
           />
 
-          {/* Ambient glow */}
+
           <motion.div
             animate={{
               x: [0, 30, 0],
@@ -83,7 +80,7 @@ export function AuthShell({
               </span>
             </Link>
 
-            {/* Main branding */}
+
             <motion.div
               initial={{
                 opacity: 0,
@@ -135,7 +132,7 @@ export function AuthShell({
                   : "Report road damage and help build a smarter, safer infrastructure network with AI-powered road intelligence."}
               </p>
 
-              {/* Small system indicator */}
+
               <div className="mt-10 flex items-center gap-3 text-xs text-background/45">
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />
@@ -153,10 +150,9 @@ export function AuthShell({
           </div>
         </section>
 
-        {/* ================================================== */}
-        {/* FORM SIDE */}
-        {/* ================================================== */}
 
+
+        {/* FORM SIDE */}
         <section className="relative flex min-h-screen flex-col">
 
           {/* Mobile header */}

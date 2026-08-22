@@ -61,7 +61,6 @@ export function HowItWorks() {
       id="how-it-works"
       className="relative overflow-hidden border-b border-border bg-background text-foreground"
     >
-      {/* Subtle grid */}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.025] dark:opacity-[0.04]"
         style={{
@@ -72,10 +71,6 @@ export function HowItWorks() {
       />
 
       <div className="relative mx-auto max-w-6xl px-6 py-24 lg:py-32">
-        {/* -------------------------------------------------- */}
-        {/* HEADER */}
-        {/* -------------------------------------------------- */}
-
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -88,7 +83,6 @@ export function HowItWorks() {
         >
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-border bg-muted/50 px-3 py-1.5 text-xs font-medium text-muted-foreground">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-
             From detection to resolution
           </div>
 
@@ -101,10 +95,6 @@ export function HowItWorks() {
             actionable infrastructure decisions.
           </p>
         </motion.div>
-
-        {/* -------------------------------------------------- */}
-        {/* WORKFLOW */}
-        {/* -------------------------------------------------- */}
 
         <div className="relative mx-auto mt-20 max-w-5xl">
           {/* Desktop timeline */}
@@ -130,7 +120,7 @@ export function HowItWorks() {
           </div>
 
           {/* Mobile timeline */}
-          <div className="absolute bottom-8 left-[18px] top-8 w-px bg-border md:hidden" />
+          <div className="absolute bottom-8 left-4.5 top-8 w-px bg-border md:hidden" />
 
           <div className="space-y-10 md:space-y-16">
             {steps.map((step, index) => {
@@ -212,21 +202,13 @@ export function HowItWorks() {
                       <span className="h-2 w-2 rounded-full bg-foreground" />
                     </div>
 
-                    <StepCard
-                      step={step}
-                      icon={Icon}
-                      align="left"
-                    />
+                    <StepCard step={step} icon={Icon} align="left" />
                   </div>
                 </motion.div>
               );
             })}
           </div>
         </div>
-
-        {/* -------------------------------------------------- */}
-        {/* END STATE */}
-        {/* -------------------------------------------------- */}
 
         <motion.div
           initial={{
@@ -251,7 +233,6 @@ export function HowItWorks() {
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-background">
               <CheckCircle2 className="h-3 w-3" />
             </span>
-
             From road observation to verified repair
           </div>
         </motion.div>
@@ -259,10 +240,6 @@ export function HowItWorks() {
     </section>
   );
 }
-
-/* ========================================================= */
-/* STEP CARD */
-/* ========================================================= */
 
 function StepCard({
   step,
@@ -289,7 +266,7 @@ function StepCard({
         <div className="flex items-start justify-between gap-5">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-muted text-foreground transition-colors duration-300 group-hover:bg-foreground group-hover:text-background">
-              <Icon className="h-[18px] w-[18px]" />
+              <Icon className="h-4.5 w-4.5" />
             </div>
 
             <div>

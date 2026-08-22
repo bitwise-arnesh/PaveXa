@@ -131,7 +131,6 @@ export function PortalSection() {
                     focus-visible:ring-offset-background
                   "
                 >
-                  {/* Subtle accent glow */}
                   <div
                     className={`
                       pointer-events-none
@@ -230,7 +229,7 @@ export function PortalSection() {
                         mt-3
                         text-xl
                         font-semibold
-                        tracking-[-0.025em]
+                        tracking-tight
                       ">
                         {portal.title}
                       </h3>
@@ -289,13 +288,12 @@ export function PortalSection() {
                     </div>
                   </div>
 
-                  {/* Bottom interaction line */}
                   <div
                     className={`
                       absolute
                       bottom-0
                       left-0
-                      h-[2px]
+                      h-0.5
                       w-0
                       transition-all
                       duration-500

@@ -71,11 +71,6 @@ export function RegisterForm() {
 
       if (error) {
         console.error("Better Auth registration error:", error);
-
-        /**
-         * Convert Better Auth errors into messages
-         * that are actually useful to the user.
-         */
         const errorMessage = getRegistrationErrorMessage(
           error.message,
           error.status
@@ -101,7 +96,7 @@ export function RegisterForm() {
           "We couldn't create your account. Please try again.",
       });
     } finally {
-      // Clear the form after every valid submission attempt.
+
       reset();
     }
   };
@@ -144,8 +139,8 @@ export function RegisterForm() {
             focus:border-foreground/40
             focus:ring-2
             focus:ring-foreground/10
-            aria-[invalid=true]:border-destructive
-            aria-[invalid=true]:focus:ring-destructive/10
+            aria-invalid:border-destructive
+            aria-invalid:focus:ring-destructive/10
           "
         />
 
@@ -191,8 +186,8 @@ export function RegisterForm() {
             focus:border-foreground/40
             focus:ring-2
             focus:ring-foreground/10
-            aria-[invalid=true]:border-destructive
-            aria-[invalid=true]:focus:ring-destructive/10
+            aria-invalid:border-destructive
+            aria-invalid:focus:ring-destructive/10
           "
         />
 

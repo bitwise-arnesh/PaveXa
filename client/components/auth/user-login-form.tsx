@@ -87,7 +87,6 @@ export function UserLoginForm() {
           "We couldn't sign you in. Please try again.",
       });
     } finally {
-      // Clear the form after every submission attempt.
       reset();
     }
   };
@@ -132,8 +131,8 @@ export function UserLoginForm() {
             focus:border-foreground/40
             focus:ring-2
             focus:ring-foreground/10
-            aria-[invalid=true]:border-destructive
-            aria-[invalid=true]:focus:ring-destructive/10
+            aria-invalid:border-destructive
+            aria-invalid:focus:ring-destructive/10
           "
         />
 
@@ -249,17 +248,12 @@ export function UserLoginForm() {
   );
 }
 
-/**
- * Convert Better Auth errors into
- * user-friendly messages.
- */
 function getLoginErrorMessage(
   message?: string,
   status?: number
 ): string {
   const normalized = message?.toLowerCase() ?? "";
 
-  // Don't expose detailed authentication information.
   if (
     normalized.includes("invalid") ||
     normalized.includes("incorrect") ||
