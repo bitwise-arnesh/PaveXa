@@ -55,7 +55,7 @@ export function AuthShell({
               repeat: Infinity,
               ease: "easeInOut",
             }}
-            className="pointer-events-none absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-white/[0.04] blur-3xl"
+            className="pointer-events-none absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-white/4 blur-3xl"
           />
 
           <div className="relative flex w-full flex-col justify-between p-10 xl:p-14">

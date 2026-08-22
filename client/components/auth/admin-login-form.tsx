@@ -158,8 +158,8 @@ export function AdminLoginForm() {
             focus:border-foreground/40
             focus:ring-2
             focus:ring-foreground/10
-            aria-[invalid=true]:border-destructive
-            aria-[invalid=true]:focus:ring-destructive/10
+            aria-invalid:border-destructive
+            aria-invalid:focus:ring-destructive/10
           "
         />
 

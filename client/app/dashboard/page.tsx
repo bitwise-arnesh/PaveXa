@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 
 import { requireSession } from "@/lib/auth-guard";
+import { ReportButton } from "@/components/report/report-button";
 
 const stats = [
   {
@@ -55,7 +56,6 @@ export default async function DashboardPage() {
   return (
     <main className="min-h-screen bg-background">
       <div className="mx-auto max-w-7xl px-6 py-10 lg:px-8">
-        {/* Header */}
         <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
@@ -72,16 +72,9 @@ export default async function DashboardPage() {
             </p>
           </div>
 
-          <a
-            href="/report"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-foreground px-4 text-sm font-semibold text-background transition hover:-translate-y-0.5 hover:shadow-md"
-          >
-            <Plus className="h-4 w-4" />
-            Report road damage
-          </a>
+          <ReportButton />
         </div>
 
-        {/* Stats */}
         <div className="mt-10 grid gap-4 sm:grid-cols-3">
           {stats.map((stat) => {
             const Icon = stat.icon;
@@ -107,9 +100,7 @@ export default async function DashboardPage() {
           })}
         </div>
 
-        {/* Main content */}
         <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_320px]">
-          {/* Reports */}
           <section className="rounded-xl border border-border bg-card shadow-sm">
             <div className="flex items-center justify-between border-b border-border px-6 py-5">
               <div>
@@ -163,7 +154,6 @@ export default async function DashboardPage() {
             </div>
           </section>
 
-          {/* Quick actions */}
           <aside className="space-y-4">
             <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
@@ -179,13 +169,10 @@ export default async function DashboardPage() {
                 issue and send it into the infrastructure workflow.
               </p>
 
-              <a
-                href="/report"
-                className="mt-5 inline-flex items-center gap-2 text-sm font-semibold hover:underline"
-              >
-                Submit a report
-                <ArrowUpRight className="h-4 w-4" />
-              </a>
+              <ReportButton
+                variant="link"
+                className="mt-5"
+              />
             </div>
 
             <div className="rounded-xl border border-border bg-muted/40 p-6">

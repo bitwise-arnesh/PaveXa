@@ -1,13 +1,27 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from ai.agent import run_agent
+# from ai.agent import run_agent
+
+from app.routes.detection import router as detection_router
 
 
 app = FastAPI(
     title="PaveXa API",
     description="Intelligent Road Infrastructure & Maintenance Platform",
     version="1.0.0"
+)
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -30,10 +44,13 @@ def health():
     }
 
 
-@app.post("/api/ai/chat")
-def ai_chat(request: ChatRequest):
-    response = run_agent(request.prompt)
+app.include_router(detection_router)
 
-    return {
-        "response": response
-    }
+
+# @app.post("/api/ai/chat")
+# def ai_chat(request: ChatRequest):
+#     response = run_agent(request.prompt)
+
+#     return {
+#         "response": response
+#     }
