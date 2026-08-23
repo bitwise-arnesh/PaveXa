@@ -9,6 +9,7 @@ import Link from "next/link";
 
 import { requireSession } from "@/lib/auth-guard";
 import { ReportButton } from "@/components/report/report-button";
+import { DeleteReportButton } from "@/components/report/delete-report-button";
 import { db } from "@/db";
 import { report } from "@/db/schemas/schema";
 import { desc, eq } from "drizzle-orm";
@@ -25,18 +26,21 @@ export default async function DashboardPage() {
   const totalReports = reports.length;
 
   const underReview = reports.filter(
-    (item) => item.status === "UNDER_REVIEW"
+    (item) => item.status === "UNDER_REVIEW",
   ).length;
 
   const resolved = reports.filter(
-    (item) => item.status === "RESOLVED"
+    (item) => item.status === "RESOLVED",
   ).length;
 
-  const recentReports = reports.slice(0, 5);
+  // Show all reports.
+  // The report list itself is scrollable.
+  const recentReports = reports;
 
   return (
     <main className="min-h-screen bg-background">
       <div className="mx-auto max-w-7xl px-6 py-10 lg:px-8">
+        {/* Header */}
         <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
@@ -48,15 +52,17 @@ export default async function DashboardPage() {
             </h1>
 
             <p className="mt-2 text-sm text-muted-foreground">
-              Track your infrastructure reports and help improve your
-              local roads.
+              Track your infrastructure reports and help improve your local
+              roads.
             </p>
           </div>
 
           <ReportButton />
         </div>
 
+        {/* Stats */}
         <div className="mt-10 grid gap-4 sm:grid-cols-3">
+          {/* Reports submitted */}
           <div className="rounded-xl border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">
@@ -71,6 +77,7 @@ export default async function DashboardPage() {
             </p>
           </div>
 
+          {/* Under review */}
           <div className="rounded-xl border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">
@@ -85,6 +92,7 @@ export default async function DashboardPage() {
             </p>
           </div>
 
+          {/* Resolved */}
           <div className="rounded-xl border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">
@@ -100,8 +108,11 @@ export default async function DashboardPage() {
           </div>
         </div>
 
+        {/* Main content */}
         <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_320px]">
+          {/* Recent reports */}
           <section className="rounded-xl border border-border bg-card shadow-sm">
+            {/* Section header */}
             <div className="flex items-center justify-between border-b border-border px-6 py-5">
               <div>
                 <h2 className="font-semibold">
@@ -114,7 +125,8 @@ export default async function DashboardPage() {
               </div>
             </div>
 
-            <div className="divide-y divide-border">
+            {/* Scrollable report list */}
+            <div className="max-h-[400px] overflow-y-auto divide-y divide-border">
               {recentReports.length === 0 ? (
                 <div className="px-6 py-12 text-center">
                   <MapPin className="mx-auto h-8 w-8 text-muted-foreground" />
@@ -129,19 +141,22 @@ export default async function DashboardPage() {
                 </div>
               ) : (
                 recentReports.map((item) => (
-                  <Link
+                  <div
                     key={item.id}
-                    href={`/report/${item.id}`}
                     className="flex items-center justify-between gap-4 px-6 py-5 transition-colors hover:bg-muted/40"
                   >
-                    <div className="flex items-start gap-3">
+                    {/* Report information */}
+                    <Link
+                      href={`/report/${item.id}`}
+                      className="flex min-w-0 flex-1 items-start gap-3"
+                    >
                       <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted">
                         <MapPin className="h-4 w-4" />
                       </div>
 
-                      <div>
-                        <p className="text-sm font-medium capitalize">
-                          {item.damageType.replaceAll("_", " ")}
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium">
+                          Report #{item.id}
                         </p>
 
                         <p className="mt-1 text-xs text-muted-foreground">
@@ -151,24 +166,35 @@ export default async function DashboardPage() {
                           {item.createdAt.toLocaleDateString()}
                         </p>
                       </div>
-                    </div>
+                    </Link>
 
-                    <span
-                      className={
-                        item.status === "RESOLVED"
-                          ? "rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400"
-                          : "rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-600 dark:text-amber-400"
-                      }
-                    >
-                      {item.status.replaceAll("_", " ")}
-                    </span>
-                  </Link>
+                    {/* Right side */}
+                    <div className="flex shrink-0 items-center gap-3">
+                      {/* Status */}
+                      <span
+                        className={
+                          item.status === "RESOLVED"
+                            ? "hidden rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 sm:inline-block"
+                            : "hidden rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-600 dark:text-amber-400 sm:inline-block"
+                        }
+                      >
+                        {item.status.replaceAll("_", " ")}
+                      </span>
+
+                      {/* Delete */}
+                      <DeleteReportButton
+                        reportId={item.id}
+                      />
+                    </div>
+                  </div>
                 ))
               )}
             </div>
           </section>
 
+          {/* Sidebar */}
           <aside className="space-y-4">
+            {/* Quick action */}
             <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                 Quick action
@@ -179,8 +205,8 @@ export default async function DashboardPage() {
               </h3>
 
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                Submit a photo and location. PaveXa will analyze the
-                issue and send it into the infrastructure workflow.
+                Submit a photo and location. PaveXa will analyze the issue and
+                send it into the infrastructure workflow.
               </p>
 
               <ReportButton
@@ -189,6 +215,7 @@ export default async function DashboardPage() {
               />
             </div>
 
+            {/* Community impact */}
             <div className="rounded-xl border border-border bg-muted/40 p-6">
               <div className="flex items-center gap-2">
                 <TriangleAlert className="h-4 w-4" />

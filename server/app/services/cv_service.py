@@ -12,7 +12,7 @@ MODEL_PATH = (
     Path(__file__).resolve().parents[3]
     / "ai"
     / "models"
-    / "yolo12m_5class_40epochs_best.pt"
+    / "PaveXa_model.pt"
 )
 
 model = YOLO(str(MODEL_PATH))
