@@ -156,10 +156,6 @@
   }
 }
 
-/* =========================================================
-   PaveXa landing page
-   One continuous infrastructure grid across all sections.
-   ========================================================= */
 
 .landing-page {
   position: relative;
@@ -212,23 +208,15 @@
     );
 }
 
-/*
- * IMPORTANT:
- * Individual sections must be transparent so the grid
- * underneath remains continuous.
- */
+
 .landing-page > section {
   background-color: transparent !important;
 }
 
-/* Keep section separators */
+
 .landing-page > section {
   border-color: var(--border);
 }
-
-/* =========================================================
-   Autofill
-   ========================================================= */
 
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
@@ -240,3 +228,4 @@ input:-webkit-autofill:active {
   caret-color: #09090b !important;
   transition: background-color 9999s ease-in-out 0s;
 }
+

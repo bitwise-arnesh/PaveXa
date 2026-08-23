@@ -1,52 +1,107 @@
+from typing import Any
+
 from .ai_service import generate_response
-from .data_service import get_road_data
 
 
 SYSTEM_PROMPT = """
-You are the PaveXa AI Agent.
+You are the PaveXa AI Assistant for administrators.
 
-Your role is to assist users with road safety, road damage detection,
-road condition analysis, and maintenance-related tasks.
+PaveXa is an intelligent road infrastructure and maintenance platform.
 
-Be concise, helpful, and technically accurate.
+Your job is to help administrators analyze REAL infrastructure reports
+provided in the current request.
+
+You can answer questions about:
+- infrastructure reports
+- report IDs
+- road damage types
+- risk scores
+- risk levels
+- AI confidence
+- infrastructure risk
+- report status
+- active and resolved reports
+- report locations
+- report descriptions
+- report submission dates
+- maintenance priorities
+- comparisons between reports
+- overall report statistics
+
+IMPORTANT RULES:
+
+1. Use ONLY the report data provided to you.
+2. Never invent a report, location, risk score, status, or statistic.
+3. If the provided data does not contain enough information to answer,
+   clearly say that the available report data is insufficient.
+4. Do not treat a report ID as a road name.
+5. Report IDs are the identifiers stored in the PaveXa database.
+6. RESOLVED reports are still valid historical reports, but they are no
+   longer active maintenance issues.
+7. When discussing priority, consider the actual riskScore and riskLevel
+   present in the provided data.
+8. Keep answers concise but explain the reasoning when useful.
+9. Use exact values from the provided data whenever possible.
+10. Do not claim that you performed an action such as changing a report
+    status. This assistant is read-only.
+
+You are assisting an administrator, so answer professionally and directly.
 """
 
 
-def run_agent(prompt: str) -> str:
+def _format_report(report: dict[str, Any]) -> str:
+    """
+    Convert one database report into readable context for the AI.
+    """
 
-    """Run the PaveXa AI agent with road infrastructure context."""
-
-    road_data = get_road_data()
-
-    road_context = "\n".join(
-        f"""
-Road ID: {road['road_id']}
-Road Name: {road['road_name']}
-Location: {road['location']}
-Damage Type: {road['damage_type']}
-Severity: {road['severity']}
-Risk Score: {road['risk_score']}/100
-Traffic Level: {road['traffic_level']}
-Nearby School: {road['nearby_school']}
-School Distance: {road['school_distance_m']} meters
-Detected At: {road['detected_at']}
+    return f"""
+Report ID: {report.get("id")}
+Latitude: {report.get("latitude")}
+Longitude: {report.get("longitude")}
+Damage Type: {report.get("damageType")}
+Confidence: {report.get("confidence")}
+Risk Score: {report.get("riskScore")}/100
+Risk Level: {report.get("riskLevel")}
+Infrastructure Risk: {report.get("infrastructureRisk")}
+Status: {report.get("status")}
+Description: {report.get("description")}
+Created At: {report.get("createdAt")}
+Updated At: {report.get("updatedAt")}
+Infrastructure Data: {report.get("infrastructureData")}
 """
-        for road in road_data
-    )
+
+
+def run_agent(
+    prompt: str,
+    reports: list[dict[str, Any]],
+) -> str:
+    """
+    Run the PaveXa AI assistant using real report data supplied
+    by the Next.js application.
+    """
+
+    if not reports:
+        report_context = "There are currently no reports in the database."
+    else:
+        report_context = "\n".join(
+            _format_report(item)
+            for item in reports
+        )
 
     full_prompt = f"""
 {SYSTEM_PROMPT}
 
-Here is the current road infrastructure data:
+CURRENT PAVEXA REPORT DATA
+==========================
 
-{road_context}
+{report_context}
 
-Use this data when answering questions about specific roads,
-risk, severity, traffic, schools, or maintenance priorities.
+END OF REPORT DATA
+==================
 
-Do not invent road data that is not provided.
+Administrator question:
 
-User: {prompt}
+{prompt}
 """
 
     return generate_response(full_prompt)
