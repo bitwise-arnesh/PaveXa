@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+python-multipart
+pydantic
+httpx
+Pillow
+ultralytics
+groq==1.6.0
+python-dotenv==1.2.3
