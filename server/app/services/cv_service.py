@@ -5,7 +5,7 @@ from fastapi import UploadFile
 from PIL import Image
 from ultralytics import YOLO
 
-from app.risk_engine.yolo_adapter import convert_yolo_detections
+from server.app.risk_engine.yolo_adapter import convert_yolo_detections
 
 
 MODEL_PATH = (

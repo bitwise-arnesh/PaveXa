@@ -1,6 +1,6 @@
 import asyncio
 
-from app.services.gis_service import (
+from server.app.services.gis_service import (
     get_nearby_infrastructure
 )
 

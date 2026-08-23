@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from ai.agent import run_agent
-from app.routes.detection import router as detection_router
+from server.app.routes.detection import router as detection_router
 
 
 app = FastAPI(

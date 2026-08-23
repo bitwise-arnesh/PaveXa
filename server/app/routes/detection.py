@@ -1,8 +1,8 @@
 from fastapi import APIRouter, File, UploadFile, Form
 
-from app.services.cv_service import detect_damage as run_cv_detection
-from app.services.gis_service import get_nearby_infrastructure
-from app.risk_engine.risk_calculator import calculate_risk
+from server.app.services.cv_service import detect_damage as run_cv_detection
+from server.app.services.gis_service import get_nearby_infrastructure
+from server.app.risk_engine.risk_calculator import calculate_risk
 
 
 router = APIRouter(
