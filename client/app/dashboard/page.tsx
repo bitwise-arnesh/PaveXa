@@ -14,6 +14,7 @@ import { db } from "@/db";
 import { report } from "@/db/schemas/schema";
 import { desc, eq } from "drizzle-orm";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { LogoutButton } from "@/components/logout-button";
 
 export default async function DashboardPage() {
   const session = await requireSession();
@@ -30,9 +31,7 @@ export default async function DashboardPage() {
     (item) => item.status === "UNDER_REVIEW",
   ).length;
 
-  const resolved = reports.filter(
-    (item) => item.status === "RESOLVED",
-  ).length;
+  const resolved = reports.filter((item) => item.status === "RESOLVED").length;
 
   const recentReports = reports;
 
@@ -97,9 +96,7 @@ export default async function DashboardPage() {
           {/* Resolved */}
           <div className="rounded-xl border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">
-                Resolved
-              </span>
+              <span className="text-sm text-muted-foreground">Resolved</span>
 
               <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
             </div>
@@ -117,9 +114,7 @@ export default async function DashboardPage() {
             {/* Section header */}
             <div className="flex items-center justify-between border-b border-border px-6 py-5">
               <div>
-                <h2 className="font-semibold">
-                  Recent reports
-                </h2>
+                <h2 className="font-semibold">Recent reports</h2>
 
                 <p className="mt-1 text-sm text-muted-foreground">
                   Your latest infrastructure submissions.
@@ -133,9 +128,7 @@ export default async function DashboardPage() {
                 <div className="px-6 py-12 text-center">
                   <MapPin className="mx-auto h-8 w-8 text-muted-foreground" />
 
-                  <p className="mt-3 text-sm font-medium">
-                    No reports yet
-                  </p>
+                  <p className="mt-3 text-sm font-medium">No reports yet</p>
 
                   <p className="mt-1 text-xs text-muted-foreground">
                     Submit your first road damage report.
@@ -189,9 +182,7 @@ export default async function DashboardPage() {
                           Only UNDER_REVIEW reports can be deleted.
                       */}
                       {item.status === "UNDER_REVIEW" && (
-                        <DeleteReportButton
-                          reportId={item.id}
-                        />
+                        <DeleteReportButton reportId={item.id} />
                       )}
                     </div>
                   </div>
@@ -217,10 +208,7 @@ export default async function DashboardPage() {
                 send it into the infrastructure workflow.
               </p>
 
-              <ReportButton
-                variant="link"
-                className="mt-5"
-              />
+              <ReportButton variant="link" className="mt-5" />
             </div>
 
             {/* Community impact */}
@@ -228,9 +216,7 @@ export default async function DashboardPage() {
               <div className="flex items-center gap-2">
                 <TriangleAlert className="h-4 w-4" />
 
-                <span className="text-sm font-semibold">
-                  Community impact
-                </span>
+                <span className="text-sm font-semibold">Community impact</span>
               </div>
 
               <p className="mt-3 text-sm leading-6 text-muted-foreground">
@@ -239,6 +225,11 @@ export default async function DashboardPage() {
               </p>
             </div>
           </aside>
+        </div>
+        {/* Logout */}
+
+        <div className="mt-8 flex justify-end border-t border-border pt-6">
+          <LogoutButton />
         </div>
       </div>
     </main>

@@ -22,7 +22,6 @@ export function AuthShell({
   return (
     <main className="min-h-screen bg-white text-zinc-950">
       <div className="grid min-h-screen lg:grid-cols-2">
-
         <section className="relative hidden overflow-hidden bg-zinc-950 text-white lg:flex">
           {/* Grid background */}
           <div
@@ -59,9 +58,13 @@ export function AuthShell({
                   scale: 1.05,
                   rotate: -3,
                 }}
-                className="flex h-9 w-9 items-center justify-center rounded-md bg-white text-zinc-950"
+                className="flex h-9 w-9 items-center justify-center rounded-md"
               >
-                <ShieldCheck className="h-4 w-4" />
+                <img
+                  src="/pavexa-logo-64.png"
+                  alt="PaveXa"
+                  className="h-8 w-8 object-contain"
+                />
               </motion.div>
 
               <span className="text-lg font-bold tracking-tight text-white">
@@ -100,17 +103,13 @@ export function AuthShell({
                   <>
                     Manage roads.
                     <br />
-                    <span className="text-white/45">
-                      Prioritize repairs.
-                    </span>
+                    <span className="text-white/45">Prioritize repairs.</span>
                   </>
                 ) : (
                   <>
                     Smarter roads.
                     <br />
-                    <span className="text-white/45">
-                      Safer communities.
-                    </span>
+                    <span className="text-white/45">Safer communities.</span>
                   </>
                 )}
               </h1>
@@ -127,7 +126,6 @@ export function AuthShell({
 
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
                 </span>
-
                 PaveXa infrastructure network
               </div>
             </motion.div>
@@ -139,14 +137,10 @@ export function AuthShell({
           </div>
         </section>
 
-
         <section className="relative flex min-h-screen bg-white text-zinc-950">
           {/* Mobile header */}
           <div className="flex items-center justify-between p-6 lg:hidden">
-            <Link
-              href="/"
-              className="flex items-center gap-2.5"
-            >
+            <Link href="/" className="flex items-center gap-2.5">
               <div className="flex h-8 w-8 items-center justify-center rounded-md bg-zinc-950 text-white">
                 <ShieldCheck className="h-4 w-4" />
               </div>
@@ -186,9 +180,7 @@ export function AuthShell({
               {/* Mobile eyebrow */}
               <div className="mb-8 lg:hidden">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
-                  {isAdmin
-                    ? "Officer access"
-                    : "Public access"}
+                  {isAdmin ? "Officer access" : "Public access"}
                 </p>
               </div>
 
@@ -204,9 +196,7 @@ export function AuthShell({
               </div>
 
               {/* Form */}
-              <div className="mt-8">
-                {children}
-              </div>
+              <div className="mt-8">{children}</div>
             </motion.div>
           </div>
         </section>

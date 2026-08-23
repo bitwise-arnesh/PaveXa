@@ -61,10 +61,7 @@ export function AdminSidebar({
   const [activeSection, setActiveSection] =
     useState("dashboard");
 
-  /*
-   * Prevent the browser from restoring the old
-   * scroll position when the dashboard is refreshed.
-   */
+
   useEffect(() => {
     if ("scrollRestoration" in window.history) {
       window.history.scrollRestoration = "manual";
@@ -96,9 +93,7 @@ export function AdminSidebar({
     };
   }, []);
 
-  /*
-   * Detect the currently visible dashboard section.
-   */
+
   useEffect(() => {
     const sections = navigation
       .map((item) =>
@@ -155,9 +150,7 @@ export function AdminSidebar({
     };
   }, []);
 
-  /*
-   * Scroll to a section without changing the URL.
-   */
+
   const handleNavigation = (
     sectionId: string,
   ) => {
