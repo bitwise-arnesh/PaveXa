@@ -164,7 +164,7 @@ async def get_nearby_infrastructure(
             "PaveXa/1.0 "
             "(road-infrastructure-research-project)"
         ),
-        "Referer": "http://localhost:3000/",
+        "Referer": "https://pavexa.vercel.app/",
         "Accept": "application/json",
     }
 
