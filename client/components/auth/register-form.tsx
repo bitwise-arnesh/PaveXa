@@ -6,7 +6,10 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowRight, Loader2 } from "lucide-react";
+import {
+  ArrowRight,
+  Loader2,
+} from "lucide-react";
 
 import { PasswordInput } from "./password-input";
 import { authClient } from "@/lib/auth-client";
@@ -16,29 +19,53 @@ const registerSchema = z
     name: z
       .string()
       .trim()
-      .min(2, "Name must be at least 2 characters")
-      .max(100, "Name must be less than 100 characters"),
+      .min(
+        2,
+        "Name must be at least 2 characters",
+      )
+      .max(
+        100,
+        "Name must be less than 100 characters",
+      ),
 
     email: z
       .string()
       .trim()
-      .email("Enter a valid email address"),
+      .email(
+        "Enter a valid email address",
+      ),
 
     password: z
       .string()
-      .min(8, "Password must be at least 8 characters")
-      .max(128, "Password must be less than 128 characters"),
+      .min(
+        8,
+        "Password must be at least 8 characters",
+      )
+      .max(
+        128,
+        "Password must be less than 128 characters",
+      ),
 
     confirmPassword: z
       .string()
-      .min(1, "Please confirm your password"),
+      .min(
+        1,
+        "Please confirm your password",
+      ),
   })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
+  .refine(
+    (data) =>
+      data.password ===
+      data.confirmPassword,
+    {
+      message: "Passwords do not match",
+      path: ["confirmPassword"],
+    },
+  );
 
-type RegisterForm = z.infer<typeof registerSchema>;
+type RegisterForm = z.infer<
+  typeof registerSchema
+>;
 
 export function RegisterForm() {
   const router = useRouter();
@@ -52,7 +79,9 @@ export function RegisterForm() {
       isSubmitting,
     },
   } = useForm<RegisterForm>({
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(
+      registerSchema,
+    ),
 
     defaultValues: {
       name: "",
@@ -62,48 +91,62 @@ export function RegisterForm() {
     },
   });
 
-  const onSubmit = async (data: RegisterForm) => {
+  const onSubmit = async (
+    data: RegisterForm,
+  ) => {
     try {
-      const { error } = await authClient.signUp.email({
-        name: data.name,
-        email: data.email,
-        password: data.password,
-      });
+      const { error } =
+        await authClient.signUp.email({
+          name: data.name,
+          email: data.email,
+          password: data.password,
+        });
 
       if (error) {
         console.error(
           "Better Auth registration error:",
-          error
+          error,
         );
 
         const errorMessage =
           getRegistrationErrorMessage(
             error.message,
-            error.status
+            error.status,
           );
 
-        toast.error("Unable to create account", {
-          description: errorMessage,
-        });
+        toast.error(
+          "Unable to create account",
+          {
+            description:
+              errorMessage,
+          },
+        );
 
         return;
       }
 
-      toast.success("Account created successfully", {
-        description: "Welcome to PaveXa.",
-      });
+      toast.success(
+        "Account created successfully",
+        {
+          description:
+            "Welcome to PaveXa.",
+        },
+      );
 
       router.push("/dashboard");
     } catch (error) {
       console.error(
         "Unexpected registration error:",
-        error
+        error,
       );
 
-      toast.error("Something went wrong", {
-        description:
-          "We couldn't create your account. Please try again.",
-      });
+      toast.error(
+        "Something went wrong",
+        {
+          description:
+            "We couldn't create your account. Please try again.",
+        },
+      );
     } finally {
       reset();
     }
@@ -116,6 +159,7 @@ export function RegisterForm() {
       noValidate
     >
       {/* Full name */}
+
       <div>
         <label
           htmlFor="name"
@@ -131,7 +175,9 @@ export function RegisterForm() {
           autoComplete="name"
           aria-invalid={!!errors.name}
           aria-describedby={
-            errors.name ? "name-error" : undefined
+            errors.name
+              ? "name-error"
+              : undefined
           }
           {...register("name")}
           className="
@@ -166,6 +212,7 @@ export function RegisterForm() {
       </div>
 
       {/* Email */}
+
       <div>
         <label
           htmlFor="email"
@@ -181,7 +228,9 @@ export function RegisterForm() {
           autoComplete="email"
           aria-invalid={!!errors.email}
           aria-describedby={
-            errors.email ? "email-error" : undefined
+            errors.email
+              ? "email-error"
+              : undefined
           }
           {...register("email")}
           className="
@@ -216,6 +265,7 @@ export function RegisterForm() {
       </div>
 
       {/* Password */}
+
       <div>
         <label
           htmlFor="password"
@@ -228,11 +278,15 @@ export function RegisterForm() {
           id="password"
           placeholder="At least 8 characters"
           autoComplete="new-password"
-          error={errors.password?.message}
+          error={
+            errors.password?.message
+          }
+          {...register("password")}
         />
       </div>
 
       {/* Confirm password */}
+
       <div>
         <label
           htmlFor="confirmPassword"
@@ -245,11 +299,17 @@ export function RegisterForm() {
           id="confirmPassword"
           placeholder="Repeat your password"
           autoComplete="new-password"
-          error={errors.confirmPassword?.message}
+          error={
+            errors.confirmPassword?.message
+          }
+          {...register(
+            "confirmPassword",
+          )}
         />
       </div>
 
       {/* Submit */}
+
       <button
         type="submit"
         disabled={isSubmitting}
@@ -299,6 +359,7 @@ export function RegisterForm() {
       </button>
 
       {/* Login */}
+
       <p className="text-center text-sm text-zinc-500">
         Already have an account?{" "}
 
@@ -321,21 +382,27 @@ export function RegisterForm() {
 
 function getRegistrationErrorMessage(
   message?: string,
-  status?: number
+  status?: number,
 ): string {
   const normalized =
     message?.toLowerCase() ?? "";
 
   if (
-    normalized.includes("already exists") ||
-    normalized.includes("already registered") ||
+    normalized.includes(
+      "already exists",
+    ) ||
+    normalized.includes(
+      "already registered",
+    ) ||
     normalized.includes("unique")
   ) {
     return "An account with this email already exists. Try signing in instead.";
   }
 
   if (
-    normalized.includes("invalid email") ||
+    normalized.includes(
+      "invalid email",
+    ) ||
     normalized.includes("email")
   ) {
     return "Please check that your email address is valid.";

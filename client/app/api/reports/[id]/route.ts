@@ -14,24 +14,11 @@ interface RouteContext {
   }>;
 }
 
-const VALID_STATUSES = [
-  "UNDER_REVIEW",
-  "IN_PROGRESS",
-  "RESOLVED",
-] as const;
+const VALID_STATUSES = ["UNDER_REVIEW", "IN_PROGRESS", "RESOLVED"] as const;
 
 type ReportStatus = (typeof VALID_STATUSES)[number];
 
-/*
-|--------------------------------------------------------------------------
-| PATCH /api/reports/[id]
-|--------------------------------------------------------------------------
-| Admins can update the status of a report.
-*/
-export async function PATCH(
-  request: Request,
-  context: RouteContext,
-) {
+export async function PATCH(request: Request, context: RouteContext) {
   try {
     // Check authentication
     const session = await auth.api.getSession({
@@ -148,10 +135,7 @@ export async function PATCH(
       report: updatedReport,
     });
   } catch (error) {
-    console.error(
-      "UPDATE REPORT STATUS ERROR:",
-      error,
-    );
+    console.error("UPDATE REPORT STATUS ERROR:", error);
 
     return NextResponse.json(
       {
@@ -164,19 +148,7 @@ export async function PATCH(
   }
 }
 
-/*
-|--------------------------------------------------------------------------
-| DELETE /api/reports/[id]
-|--------------------------------------------------------------------------
-| Users can delete their own reports ONLY while the report is
-| still UNDER_REVIEW.
-|
-| IN_PROGRESS and RESOLVED reports cannot be deleted.
-*/
-export async function DELETE(
-  request: Request,
-  context: RouteContext,
-) {
+export async function DELETE(request: Request, context: RouteContext) {
   try {
     // Check authentication
     const session = await auth.api.getSession({
@@ -207,12 +179,6 @@ export async function DELETE(
       );
     }
 
-    /*
-     * Find the report belonging to the authenticated user.
-     *
-     * We also fetch the status because deletion is only allowed
-     * while the report is UNDER_REVIEW.
-     */
     const [existingReport] = await db
       .select({
         id: report.id,
@@ -221,12 +187,7 @@ export async function DELETE(
         status: report.status,
       })
       .from(report)
-      .where(
-        and(
-          eq(report.id, id),
-          eq(report.userId, session.user.id),
-        ),
-      )
+      .where(and(eq(report.id, id), eq(report.userId, session.user.id)))
       .limit(1);
 
     if (!existingReport) {
@@ -240,13 +201,6 @@ export async function DELETE(
       );
     }
 
-    /*
-     * Reports can only be deleted while they are still
-     * waiting for review.
-     *
-     * Once an admin moves the report to IN_PROGRESS or
-     * RESOLVED, deletion is permanently blocked.
-     */
     if (existingReport.status !== "UNDER_REVIEW") {
       return NextResponse.json(
         {
@@ -259,28 +213,10 @@ export async function DELETE(
       );
     }
 
-    /*
-     * Delete the database record.
-     *
-     * userId has already been checked above, so this can only
-     * delete the authenticated user's own report.
-     */
     await db
       .delete(report)
-      .where(
-        and(
-          eq(report.id, id),
-          eq(report.userId, session.user.id),
-        ),
-      );
+      .where(and(eq(report.id, id), eq(report.userId, session.user.id)));
 
-    /*
-     * Delete the uploaded image from:
-     *
-     * public/uploads/<filename>
-     *
-     * Do this after deleting the database record.
-     */
     if (existingReport.imageUrl) {
       try {
         const imagePath = path.join(
@@ -291,31 +227,18 @@ export async function DELETE(
 
         await unlink(imagePath);
       } catch (error) {
-        /*
-         * If the image is already missing, don't fail
-         * the whole deletion.
-         */
-        console.warn(
-          "REPORT IMAGE DELETE WARNING:",
-          error,
-        );
+        console.warn("REPORT IMAGE DELETE WARNING:", error);
       }
     }
 
-    console.log(
-      "REPORT DELETED:",
-      existingReport.id,
-    );
+    console.log("REPORT DELETED:", existingReport.id);
 
     return NextResponse.json({
       message: "Report deleted successfully",
       reportId: existingReport.id,
     });
   } catch (error) {
-    console.error(
-      "DELETE REPORT ERROR:",
-      error,
-    );
+    console.error("DELETE REPORT ERROR:", error);
 
     return NextResponse.json(
       {

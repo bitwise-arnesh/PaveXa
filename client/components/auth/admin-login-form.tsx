@@ -228,10 +228,7 @@ export function AdminLoginForm() {
   );
 }
 
-/**
- * Convert Better Auth errors into safe,
- * user-friendly messages.
- */
+
 function getAdminLoginErrorMessage(
   message?: string,
   status?: number,

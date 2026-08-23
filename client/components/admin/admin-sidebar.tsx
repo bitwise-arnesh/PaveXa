@@ -6,11 +6,9 @@ import {
   Bot,
   LayoutDashboard,
   Map,
-  ShieldCheck,
   TriangleAlert,
+  UserShield,
 } from "lucide-react";
-
-import Link from "next/link";
 
 import {
   Sidebar,
@@ -25,8 +23,6 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-import { ThemeToggle } from "@/components/theme-toggle";
-
 interface AdminSidebarProps {
   userName: string;
 }
@@ -34,78 +30,159 @@ interface AdminSidebarProps {
 const navigation = [
   {
     title: "Dashboard",
-    href: "#dashboard",
+    sectionId: "dashboard",
     icon: LayoutDashboard,
   },
   {
     title: "Infrastructure Map",
-    href: "#infrastructure-map",
+    sectionId: "infrastructure-map",
     icon: Map,
   },
   {
     title: "Reports",
-    href: "#reports",
+    sectionId: "reports",
     icon: TriangleAlert,
   },
   {
     title: "AI Assistant",
-    href: "#ai-assistant",
+    sectionId: "ai-assistant",
     icon: Bot,
   },
   {
     title: "Assign Crew",
-    href: "#assign-crew",
+    sectionId: "assign-crew",
     icon: Activity,
-  }
+  },
 ];
 
-export function AdminSidebar({ userName }: AdminSidebarProps) {
-  const [activeSection, setActiveSection] = useState("dashboard");
+export function AdminSidebar({
+  userName,
+}: AdminSidebarProps) {
+  const [activeSection, setActiveSection] =
+    useState("dashboard");
 
   /*
-   * ------------------------------------------------------------
-   * Detect the section currently visible on screen
-   * ------------------------------------------------------------
+   * Prevent the browser from restoring the old
+   * scroll position when the dashboard is refreshed.
    */
+  useEffect(() => {
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
 
+    // Remove any existing hash without causing navigation.
+    if (window.location.hash) {
+      window.history.replaceState(
+        null,
+        "",
+        window.location.pathname +
+          window.location.search,
+      );
+    }
+
+    // Force the page to the top after refresh.
+    window.scrollTo(0, 0);
+
+    const frame = requestAnimationFrame(() => {
+      window.scrollTo(0, 0);
+    });
+
+    return () => {
+      cancelAnimationFrame(frame);
+
+      if ("scrollRestoration" in window.history) {
+        window.history.scrollRestoration = "auto";
+      }
+    };
+  }, []);
+
+  /*
+   * Detect the currently visible dashboard section.
+   */
   useEffect(() => {
     const sections = navigation
-      .map((item) => document.getElementById(item.href.replace("#", "")))
-      .filter((section): section is HTMLElement => section !== null);
+      .map((item) =>
+        document.getElementById(
+          item.sectionId,
+        ),
+      )
+      .filter(
+        (section): section is HTMLElement =>
+          section !== null,
+      );
 
     if (!sections.length) {
       return;
     }
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+    const observer =
+      new IntersectionObserver(
+        (entries) => {
+          const visible = entries
+            .filter(
+              (entry) =>
+                entry.isIntersecting,
+            )
+            .sort(
+              (a, b) =>
+                b.intersectionRatio -
+                a.intersectionRatio,
+            );
 
-        if (visible.length) {
-          setActiveSection(visible[0].target.id);
-        }
-      },
-      {
-        rootMargin: "-20% 0px -65% 0px",
-        threshold: [0.1, 0.25, 0.5],
-      },
+          if (visible.length) {
+            setActiveSection(
+              visible[0].target.id,
+            );
+          }
+        },
+        {
+          rootMargin:
+            "-20% 0px -65% 0px",
+          threshold: [
+            0.1,
+            0.25,
+            0.5,
+          ],
+        },
+      );
+
+    sections.forEach((section) =>
+      observer.observe(section),
     );
-
-    sections.forEach((section) => observer.observe(section));
 
     return () => {
       observer.disconnect();
     };
   }, []);
 
-  return (
-    <Sidebar collapsible="icon" variant="sidebar">
-      {/* =========================================================
-          LOGO
-      ========================================================= */}
+  /*
+   * Scroll to a section without changing the URL.
+   */
+  const handleNavigation = (
+    sectionId: string,
+  ) => {
+    const section =
+      document.getElementById(
+        sectionId,
+      );
 
+    if (!section) {
+      return;
+    }
+
+    setActiveSection(sectionId);
+
+    section.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  };
+
+  return (
+    <Sidebar
+      collapsible="icon"
+      variant="sidebar"
+    >
       <SidebarHeader className="border-b border-border">
         <div
           className="
@@ -115,8 +192,6 @@ export function AdminSidebar({ userName }: AdminSidebarProps) {
             group-data-[collapsible=icon]:px-0
           "
         >
-          {/* Logo */}
-
           <div
             className="
               flex h-9 w-9 shrink-0
@@ -126,7 +201,11 @@ export function AdminSidebar({ userName }: AdminSidebarProps) {
               text-background
             "
           >
-            <ShieldCheck className="h-5 w-5" />
+            <img
+              src="/pavexa-logo-64.png"
+              alt="PaveXa"
+              className="h-8 w-8 object-contain"
+            />
           </div>
 
           {/* Brand */}
@@ -150,9 +229,7 @@ export function AdminSidebar({ userName }: AdminSidebarProps) {
         </div>
       </SidebarHeader>
 
-      {/* =========================================================
-          ADMIN PROFILE
-      ========================================================= */}
+      {/* ADMIN PROFILE */}
 
       <div
         className="
@@ -194,7 +271,7 @@ export function AdminSidebar({ userName }: AdminSidebarProps) {
                 text-background
               "
             >
-              <ShieldCheck className="h-4 w-4" />
+              <UserShield className="h-4 w-4" />
             </div>
 
             {/* User details */}
@@ -206,7 +283,9 @@ export function AdminSidebar({ userName }: AdminSidebarProps) {
                 group-data-[collapsible=icon]:hidden
               "
             >
-              <p className="truncate text-sm font-semibold">{userName}</p>
+              <p className="truncate text-sm font-semibold">
+                {userName}
+              </p>
 
               <p className="mt-0.5 truncate text-xs text-muted-foreground">
                 Administrator
@@ -220,14 +299,10 @@ export function AdminSidebar({ userName }: AdminSidebarProps) {
         </div>
       </div>
 
-      {/* =========================================================
-          NAVIGATION
-      ========================================================= */}
+      {/* NAVIGATION */}
 
       <SidebarContent className="mt-4">
         <SidebarGroup>
-          {/* Section title */}
-
           <SidebarGroupLabel
             className="
               px-3
@@ -242,36 +317,40 @@ export function AdminSidebar({ userName }: AdminSidebarProps) {
               {navigation.map((item) => {
                 const Icon = item.icon;
 
-                const sectionId = item.href.replace("#", "");
-
-                const isActive = activeSection === sectionId;
+                const isActive =
+                  activeSection ===
+                  item.sectionId;
 
                 return (
-                  <SidebarMenuItem key={item.title}>
+                  <SidebarMenuItem
+                    key={item.title}
+                  >
                     <SidebarMenuButton
                       isActive={isActive}
                       tooltip={item.title}
                       className="
-    h-10
-    w-full
-    rounded-lg
-    px-3
-    transition-colors
+                        h-10
+                        w-full
+                        rounded-lg
+                        px-3
+                        transition-colors
 
-    group-data-[collapsible=icon]:justify-center
-    group-data-[collapsible=icon]:px-0
-  "
-                      onClick={() => {
-                        window.location.hash = sectionId;
-                      }}
+                        group-data-[collapsible=icon]:justify-center
+                        group-data-[collapsible=icon]:px-0
+                      "
+                      onClick={() =>
+                        handleNavigation(
+                          item.sectionId,
+                        )
+                      }
                     >
                       <Icon className="h-[18px] w-[18px] shrink-0" />
 
                       <span
                         className="
-      truncate
-      group-data-[collapsible=icon]:hidden
-    "
+                          truncate
+                          group-data-[collapsible=icon]:hidden
+                        "
                       >
                         {item.title}
                       </span>
@@ -282,16 +361,7 @@ export function AdminSidebar({ userName }: AdminSidebarProps) {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
-        {/* =======================================================
-            SYSTEM STATUS
-        ======================================================= */}
-
       </SidebarContent>
-
-      {/* =========================================================
-          FOOTER
-      ========================================================= */}
 
       <SidebarFooter className="border-t border-border">
         <div
@@ -320,17 +390,15 @@ export function AdminSidebar({ userName }: AdminSidebarProps) {
             <Activity className="h-4 w-4 shrink-0 text-emerald-500" />
 
             <div className="min-w-0">
-              <p className="truncate text-xs font-medium">All systems online</p>
+              <p className="truncate text-xs font-medium">
+                All systems online
+              </p>
 
               <p className="truncate text-[10px] text-muted-foreground">
                 PaveXa infrastructure
               </p>
             </div>
           </div>
-
-
-
-
         </div>
       </SidebarFooter>
     </Sidebar>

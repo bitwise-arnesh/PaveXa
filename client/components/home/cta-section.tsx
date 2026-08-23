@@ -9,7 +9,7 @@ export function CtaSection() {
     <section className="relative overflow-hidden bg-transparent">
       
 
-      {/* Ambient glow */}
+
       <motion.div
         animate={{
           scale: [1, 1.08, 1],
@@ -36,7 +36,7 @@ export function CtaSection() {
       />
 
       <div className="relative mx-auto max-w-5xl px-6 py-24 sm:py-28">
-        {/* Top status */}
+
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}

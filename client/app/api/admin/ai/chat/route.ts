@@ -11,11 +11,7 @@ const API_URL =
 
 export async function POST(request: Request) {
   try {
-    /*
-     * ------------------------------------------------------------
-     * 1. Check authentication
-     * ------------------------------------------------------------
-     */
+
 
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -32,11 +28,6 @@ export async function POST(request: Request) {
       );
     }
 
-    /*
-     * ------------------------------------------------------------
-     * 2. Only administrators can use the AI assistant
-     * ------------------------------------------------------------
-     */
 
     if (session.user.role !== "admin") {
       return NextResponse.json(
@@ -49,11 +40,7 @@ export async function POST(request: Request) {
       );
     }
 
-    /*
-     * ------------------------------------------------------------
-     * 3. Read administrator's question
-     * ------------------------------------------------------------
-     */
+
 
     const body = await request.json();
 
@@ -73,17 +60,7 @@ export async function POST(request: Request) {
       );
     }
 
-    /*
-     * ------------------------------------------------------------
-     * 4. Fetch REAL reports from Neon/PostgreSQL
-     * ------------------------------------------------------------
-     *
-     * Nothing here comes from mock_data.json.
-     *
-     * These are the actual reports stored in:
-     *
-     * report
-     */
+
 
     const reports = await db
       .select({
@@ -106,11 +83,7 @@ export async function POST(request: Request) {
       .from(report)
       .orderBy(desc(report.createdAt));
 
-    /*
-     * ------------------------------------------------------------
-     * 5. Send the real database reports to FastAPI
-     * ------------------------------------------------------------
-     */
+
 
     const response = await fetch(
       `${API_URL}/api/ai/chat`,
@@ -162,11 +135,6 @@ export async function POST(request: Request) {
       },
     );
 
-    /*
-     * ------------------------------------------------------------
-     * 6. Handle FastAPI errors
-     * ------------------------------------------------------------
-     */
 
     let data: {
       response?: string;
@@ -200,11 +168,6 @@ export async function POST(request: Request) {
       );
     }
 
-    /*
-     * ------------------------------------------------------------
-     * 7. Return AI response to the dashboard
-     * ------------------------------------------------------------
-     */
 
     return NextResponse.json({
       response: data.response,

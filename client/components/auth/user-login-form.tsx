@@ -165,19 +165,7 @@ export function UserLoginForm() {
             Password
           </label>
 
-          <Link
-            href="/forgot-password"
-            className="
-              text-xs
-              text-zinc-500
-              transition-colors
-              hover:text-zinc-950
-              hover:underline
-              underline-offset-4
-            "
-          >
-            Forgot password?
-          </Link>
+
         </div>
 
         <PasswordInput

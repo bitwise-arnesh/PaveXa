@@ -3,11 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-const STATUSES = [
-  "UNDER_REVIEW",
-  "IN_PROGRESS",
-  "RESOLVED",
-] as const;
+const STATUSES = ["UNDER_REVIEW", "IN_PROGRESS", "RESOLVED"] as const;
 
 interface ReportStatusSelectProps {
   reportId: string;
@@ -23,9 +19,7 @@ export function ReportStatusSelect({
   const [value, setValue] = useState(status);
   const [loading, setLoading] = useState(false);
 
-  async function handleChange(
-    event: React.ChangeEvent<HTMLSelectElement>,
-  ) {
+  async function handleChange(event: React.ChangeEvent<HTMLSelectElement>) {
     const nextStatus = event.target.value;
     const previousStatus = value;
 
@@ -33,18 +27,15 @@ export function ReportStatusSelect({
     setLoading(true);
 
     try {
-      const response = await fetch(
-        `/api/reports/${reportId}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            status: nextStatus,
-          }),
+      const response = await fetch(`/api/reports/${reportId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({
+          status: nextStatus,
+        }),
+      });
 
       if (!response.ok) {
         let message = "Failed to update report status.";
@@ -55,37 +46,14 @@ export function ReportStatusSelect({
           if (data?.error) {
             message = data.error;
           }
-        } catch {
-          // Ignore invalid JSON responses.
-        }
+        } catch {}
 
         throw new Error(message);
       }
 
-      /*
-       * The dashboard is a Server Component.
-       *
-       * Refresh causes all database queries in the dashboard
-       * to execute again.
-       *
-       * Therefore:
-       *
-       * - Under review count updates
-       * - Resolved count updates
-       * - Active reports updates
-       * - Resolution rate updates
-       * - Priority queue updates
-       *
-       * If the report was changed to RESOLVED,
-       * it disappears from the priority queue because
-       * the dashboard query excludes resolved reports.
-       */
       router.refresh();
     } catch (error) {
-      console.error(
-        "REPORT STATUS UPDATE ERROR:",
-        error,
-      );
+      console.error("REPORT STATUS UPDATE ERROR:", error);
 
       setValue(previousStatus);
 
@@ -127,10 +95,7 @@ export function ReportStatusSelect({
       "
     >
       {STATUSES.map((statusOption) => (
-        <option
-          key={statusOption}
-          value={statusOption}
-        >
+        <option key={statusOption} value={statusOption}>
           {statusOption.replaceAll("_", " ")}
         </option>
       ))}

@@ -22,7 +22,7 @@ export function AuthShell({
   return (
     <main className="min-h-screen bg-white text-zinc-950">
       <div className="grid min-h-screen lg:grid-cols-2">
-        {/* LEFT — ALWAYS DARK */}
+
         <section className="relative hidden overflow-hidden bg-zinc-950 text-white lg:flex">
           {/* Grid background */}
           <div
@@ -139,7 +139,7 @@ export function AuthShell({
           </div>
         </section>
 
-        {/* RIGHT — ALWAYS WHITE */}
+
         <section className="relative flex min-h-screen bg-white text-zinc-950">
           {/* Mobile header */}
           <div className="flex items-center justify-between p-6 lg:hidden">

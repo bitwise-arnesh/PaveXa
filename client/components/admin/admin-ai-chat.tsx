@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Bot,
-  Loader2,
-  Send,
-  Sparkles,
-  User,
-} from "lucide-react";
+import { Bot, Loader2, Send, Sparkles, User } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 interface Message {
@@ -34,8 +28,7 @@ export function AdminAiChat() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const messagesEndRef =
-    useRef<HTMLDivElement | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
@@ -56,27 +49,21 @@ export function AdminAiChat() {
       content: prompt,
     };
 
-    setMessages((current) => [
-      ...current,
-      userMessage,
-    ]);
+    setMessages((current) => [...current, userMessage]);
 
     setInput("");
     setLoading(true);
 
     try {
-      const response = await fetch(
-        "/api/admin/ai/chat",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            prompt,
-          }),
+      const response = await fetch("/api/admin/ai/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({
+          prompt,
+        }),
+      });
 
       let data: {
         response?: string;
@@ -86,16 +73,11 @@ export function AdminAiChat() {
       try {
         data = await response.json();
       } catch {
-        throw new Error(
-          "The AI server returned an invalid response.",
-        );
+        throw new Error("The AI server returned an invalid response.");
       }
 
       if (!response.ok) {
-        throw new Error(
-          data.error ||
-            "Failed to get an AI response.",
-        );
+        throw new Error(data.error || "Failed to get an AI response.");
       }
 
       setMessages((current) => [
@@ -103,16 +85,11 @@ export function AdminAiChat() {
         {
           id: Date.now() + 1,
           role: "assistant",
-          content:
-            data.response ||
-            "I couldn't generate a response.",
+          content: data.response || "I couldn't generate a response.",
         },
       ]);
     } catch (error) {
-      console.error(
-        "ADMIN AI CHAT ERROR:",
-        error,
-      );
+      console.error("ADMIN AI CHAT ERROR:", error);
 
       setMessages((current) => [
         ...current,
@@ -130,20 +107,13 @@ export function AdminAiChat() {
     }
   }
 
-  function handleSubmit(
-    event: React.FormEvent<HTMLFormElement>,
-  ) {
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     sendMessage();
   }
 
-  function handleKeyDown(
-    event: React.KeyboardEvent<HTMLTextAreaElement>,
-  ) {
-    if (
-      event.key === "Enter" &&
-      !event.shiftKey
-    ) {
+  function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       sendMessage();
     }
@@ -151,14 +121,12 @@ export function AdminAiChat() {
 
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-      {/* =========================================================
-          HEADER
-      ========================================================= */}
+      {/* HEADER */}
 
       <div className="flex items-center justify-between border-b border-border px-5 py-4 sm:px-6">
         <div className="flex min-w-0 items-center gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-foreground text-background">
-            <Sparkles className="h-4 w-4" />
+            <Sparkles className="h-6 w-6" />
           </div>
 
           <div className="min-w-0">
@@ -185,9 +153,7 @@ export function AdminAiChat() {
         </div>
       </div>
 
-      {/* =========================================================
-          CHAT
-      ========================================================= */}
+      {/* CHAT */}
 
       <div className="flex min-h-[520px] flex-col">
         {/* Messages */}
@@ -195,23 +161,16 @@ export function AdminAiChat() {
         <div className="flex-1 overflow-y-auto px-5 py-6 sm:px-7">
           <div className="mx-auto max-w-4xl space-y-6">
             {messages.map((message) => {
-              const isUser =
-                message.role === "user";
+              const isUser = message.role === "user";
 
               return (
                 <div
                   key={message.id}
-                  className={`flex ${
-                    isUser
-                      ? "justify-end"
-                      : "justify-start"
-                  }`}
+                  className={`flex ${isUser ? "justify-end" : "justify-start"}`}
                 >
                   <div
                     className={`flex max-w-[90%] items-start gap-3 sm:max-w-[78%] ${
-                      isUser
-                        ? "flex-row-reverse"
-                        : ""
+                      isUser ? "flex-row-reverse" : ""
                     }`}
                   >
                     {/* Avatar */}
@@ -239,9 +198,7 @@ export function AdminAiChat() {
                           : "rounded-tl-md border border-border bg-muted/30"
                       }`}
                     >
-                      <p className="whitespace-pre-wrap">
-                        {message.content}
-                      </p>
+                      <p className="whitespace-pre-wrap">{message.content}</p>
                     </div>
                   </div>
                 </div>
@@ -272,9 +229,7 @@ export function AdminAiChat() {
           </div>
         </div>
 
-        {/* =======================================================
-            SUGGESTIONS
-        ======================================================= */}
+        {/* SUGGESTIONS */}
 
         {messages.length === 1 && !loading && (
           <div className="border-t border-border bg-muted/[0.15] px-5 py-4 sm:px-7">
@@ -284,28 +239,22 @@ export function AdminAiChat() {
               </p>
 
               <div className="flex flex-wrap gap-2">
-                {SUGGESTED_PROMPTS.map(
-                  (prompt) => (
-                    <button
-                      key={prompt}
-                      type="button"
-                      onClick={() =>
-                        sendMessage(prompt)
-                      }
-                      className="rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:border-foreground/30 hover:bg-muted hover:text-foreground"
-                    >
-                      {prompt}
-                    </button>
-                  ),
-                )}
+                {SUGGESTED_PROMPTS.map((prompt) => (
+                  <button
+                    key={prompt}
+                    type="button"
+                    onClick={() => sendMessage(prompt)}
+                    className="rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:border-foreground/30 hover:bg-muted hover:text-foreground"
+                  >
+                    {prompt}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
         )}
 
-        {/* =======================================================
-            INPUT
-        ======================================================= */}
+        {/* INPUT */}
 
         <div className="border-t border-border bg-background px-5 py-4 sm:px-7">
           <div className="mx-auto max-w-4xl">
@@ -315,9 +264,7 @@ export function AdminAiChat() {
             >
               <textarea
                 value={input}
-                onChange={(event) =>
-                  setInput(event.target.value)
-                }
+                onChange={(event) => setInput(event.target.value)}
                 onKeyDown={handleKeyDown}
                 disabled={loading}
                 rows={1}
@@ -342,10 +289,7 @@ export function AdminAiChat() {
 
               <button
                 type="submit"
-                disabled={
-                  loading ||
-                  !input.trim()
-                }
+                disabled={loading || !input.trim()}
                 aria-label="Send message"
                 className="
                   flex

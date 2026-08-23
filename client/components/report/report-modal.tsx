@@ -281,16 +281,6 @@ export function ReportModal({
     lat: number,
     lon: number,
   ) => {
-    /*
-     * IMPORTANT:
-     *
-     * Do NOT use toFixed() here.
-     *
-     * Leaflet gives us the full JavaScript
-     * number. String() preserves the useful
-     * precision without intentionally
-     * truncating the coordinates.
-     */
 
     setLatitude(
       String(lat),
@@ -375,9 +365,6 @@ export function ReportModal({
           .NEXT_PUBLIC_API_URL ||
         "http://localhost:8000";
 
-      /*
-       * Nearby reports
-       */
 
       const reportCountResponse =
         await fetch(
@@ -419,9 +406,6 @@ export function ReportModal({
         reportCount,
       );
 
-      /*
-       * Send image to AI backend
-       */
 
       const detectionFormData =
         new FormData();
@@ -504,9 +488,6 @@ export function ReportModal({
         result,
       );
 
-      /*
-       * GIS
-       */
 
       const gisResult =
         detectionData.gis ??
@@ -516,10 +497,7 @@ export function ReportModal({
         gisResult,
       );
 
-      /*
-       * Risk
-       */
-
+  
       const calculatedRisk =
         detectionData.risk;
 
@@ -561,10 +539,6 @@ export function ReportModal({
         "FINAL RISK:",
         calculatedRisk,
       );
-
-      /*
-       * Save report
-       */
 
       const reportFormData =
         new FormData();

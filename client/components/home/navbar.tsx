@@ -24,14 +24,7 @@ export function Navbar() {
       className="sticky top-0 z-50 border-b border-border/70 bg-background/90 backdrop-blur-md"
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-        {/* ------------------------------------------------ */}
-        {/* LOGO */}
-        {/* ------------------------------------------------ */}
-
-        <Link
-          href="/"
-          className="group flex items-center gap-2.5"
-        >
+        <Link href="/" className="group flex items-center gap-2.5">
           <motion.div
             whileHover={{
               scale: 1.06,
@@ -45,9 +38,13 @@ export function Navbar() {
               stiffness: 400,
               damping: 20,
             }}
-            className="flex h-8 w-8 items-center justify-center rounded-md bg-foreground text-background"
+            className="flex h-8 w-8 items-center justify-center"
           >
-            <ShieldCheck className="h-4 w-4" />
+            <img
+              src="/pavexa-logo-64.png"
+              alt="PaveXa"
+              className="h-8 w-8 object-contain"
+            />
           </motion.div>
 
           <motion.div
@@ -58,19 +55,13 @@ export function Navbar() {
               duration: 0.2,
             }}
           >
-            <span className="text-lg font-bold tracking-tight">
-              PaveXa
-            </span>
+            <span className="text-lg font-bold tracking-tight">PaveXa</span>
 
             <span className="ml-2 hidden text-xs text-muted-foreground sm:inline">
               Road Intelligence
             </span>
           </motion.div>
         </Link>
-
-        {/* ------------------------------------------------ */}
-        {/* NAVIGATION */}
-        {/* ------------------------------------------------ */}
 
         <div className="flex items-center gap-3">
           <ThemeToggle />

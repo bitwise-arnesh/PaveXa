@@ -178,7 +178,6 @@
   background-position: 0 0;
 }
 
-/* Keep the grid subtle in light mode */
 :root .landing-page {
   background-image:
     linear-gradient(
@@ -193,7 +192,6 @@
     );
 }
 
-/* Slightly stronger infrastructure grid in dark mode */
 .dark .landing-page {
   background-image:
     linear-gradient(

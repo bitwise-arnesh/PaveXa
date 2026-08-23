@@ -41,14 +41,20 @@ export function PasswordInput({
             disabled:cursor-not-allowed
             disabled:bg-zinc-100
             disabled:opacity-60
-            ${error ? "border-red-500 focus:border-red-500" : ""}
+            ${
+              error
+                ? "border-red-500 focus:border-red-500 focus:ring-red-500/10"
+                : ""
+            }
             ${className}
           `}
         />
 
         <button
           type="button"
-          onClick={() => setVisible((value) => !value)}
+          onClick={() =>
+            setVisible((value) => !value)
+          }
           aria-label={
             visible
               ? "Hide password"
