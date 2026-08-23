@@ -20,21 +20,11 @@ export function AuthShell({
   const isAdmin = type === "admin";
 
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-screen bg-white text-zinc-950">
       <div className="grid min-h-screen lg:grid-cols-2">
-
-
-        <section
-          className={`
-            relative
-            hidden
-            overflow-hidden
-            lg:flex
-            ${isAdmin ? "bg-zinc-950" : "bg-foreground"}
-            text-background
-          `}
-        >
-
+        {/* LEFT — ALWAYS DARK */}
+        <section className="relative hidden overflow-hidden bg-zinc-950 text-white lg:flex">
+          {/* Grid background */}
           <div
             className="pointer-events-none absolute inset-0 opacity-[0.05]"
             style={{
@@ -44,7 +34,7 @@ export function AuthShell({
             }}
           />
 
-
+          {/* Background glow */}
           <motion.div
             animate={{
               x: [0, 30, 0],
@@ -55,11 +45,10 @@ export function AuthShell({
               repeat: Infinity,
               ease: "easeInOut",
             }}
-            className="pointer-events-none absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-white/4 blur-3xl"
+            className="pointer-events-none absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-white/5 blur-3xl"
           />
 
           <div className="relative flex w-full flex-col justify-between p-10 xl:p-14">
-
             {/* Logo */}
             <Link
               href="/"
@@ -70,17 +59,17 @@ export function AuthShell({
                   scale: 1.05,
                   rotate: -3,
                 }}
-                className="flex h-9 w-9 items-center justify-center rounded-md bg-background text-foreground"
+                className="flex h-9 w-9 items-center justify-center rounded-md bg-white text-zinc-950"
               >
                 <ShieldCheck className="h-4 w-4" />
               </motion.div>
 
-              <span className="text-lg font-bold tracking-tight">
+              <span className="text-lg font-bold tracking-tight text-white">
                 PaveXa
               </span>
             </Link>
 
-
+            {/* Main content */}
             <motion.div
               initial={{
                 opacity: 0,
@@ -99,19 +88,19 @@ export function AuthShell({
               <div className="mb-6 flex items-center gap-2">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
 
-                <span className="text-xs font-medium uppercase tracking-[0.18em] text-background/50">
+                <span className="text-xs font-medium uppercase tracking-[0.18em] text-white/50">
                   {isAdmin
                     ? "Infrastructure command"
                     : "Infrastructure intelligence"}
                 </span>
               </div>
 
-              <h1 className="text-5xl font-semibold leading-[0.98] tracking-[-0.045em] xl:text-6xl">
+              <h1 className="text-5xl font-semibold leading-[0.98] tracking-[-0.045em] text-white xl:text-6xl">
                 {isAdmin ? (
                   <>
                     Manage roads.
                     <br />
-                    <span className="text-background/45">
+                    <span className="text-white/45">
                       Prioritize repairs.
                     </span>
                   </>
@@ -119,23 +108,23 @@ export function AuthShell({
                   <>
                     Smarter roads.
                     <br />
-                    <span className="text-background/45">
+                    <span className="text-white/45">
                       Safer communities.
                     </span>
                   </>
                 )}
               </h1>
 
-              <p className="mt-7 max-w-md text-sm leading-7 text-background/55">
+              <p className="mt-7 max-w-md text-sm leading-7 text-white/55">
                 {isAdmin
                   ? "A centralized workspace for reviewing infrastructure reports, understanding risk, and prioritizing critical repairs."
                   : "Report road damage and help build a smarter, safer infrastructure network with AI-powered road intelligence."}
               </p>
 
-
-              <div className="mt-10 flex items-center gap-3 text-xs text-background/45">
+              <div className="mt-10 flex items-center gap-3 text-xs text-white/45">
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />
+
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
                 </span>
 
@@ -144,35 +133,32 @@ export function AuthShell({
             </motion.div>
 
             {/* Footer */}
-            <div className="text-xs text-background/30">
+            <div className="text-xs text-white/30">
               © {new Date().getFullYear()} PaveXa
             </div>
           </div>
         </section>
 
-
-
-        {/* FORM SIDE */}
-        <section className="relative flex min-h-screen flex-col">
-
+        {/* RIGHT — ALWAYS WHITE */}
+        <section className="relative flex min-h-screen bg-white text-zinc-950">
           {/* Mobile header */}
           <div className="flex items-center justify-between p-6 lg:hidden">
             <Link
               href="/"
               className="flex items-center gap-2.5"
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-foreground text-background">
+              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-zinc-950 text-white">
                 <ShieldCheck className="h-4 w-4" />
               </div>
 
-              <span className="text-lg font-bold tracking-tight">
+              <span className="text-lg font-bold tracking-tight text-zinc-950">
                 PaveXa
               </span>
             </Link>
 
             <Link
               href="/"
-              className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground"
+              className="flex items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-950"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               Home
@@ -199,18 +185,20 @@ export function AuthShell({
             >
               {/* Mobile eyebrow */}
               <div className="mb-8 lg:hidden">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  {isAdmin ? "Officer access" : "Public access"}
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                  {isAdmin
+                    ? "Officer access"
+                    : "Public access"}
                 </p>
               </div>
 
               {/* Heading */}
               <div>
-                <h2 className="text-3xl font-semibold tracking-[-0.035em]">
+                <h2 className="text-3xl font-semibold tracking-[-0.035em] text-zinc-950">
                   {title}
                 </h2>
 
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                <p className="mt-2 text-sm leading-6 text-zinc-500">
                   {description}
                 </p>
               </div>

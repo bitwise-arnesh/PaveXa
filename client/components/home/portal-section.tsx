@@ -2,12 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "motion/react";
-import {
-  ArrowRight,
-  ArrowUpRight,
-  Building2,
-  UserRound,
-} from "lucide-react";
+import { ArrowRight, ArrowUpRight, Building2, UserRound } from "lucide-react";
 
 const portals = [
   {
@@ -50,10 +45,9 @@ export function PortalSection() {
   return (
     <section
       id="portals"
-      className="relative overflow-hidden border-b border-border bg-background"
+      className="relative overflow-hidden bg-transparent"
     >
       <div className="mx-auto max-w-7xl px-6 py-24 lg:py-28">
-
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -150,10 +144,8 @@ export function PortalSection() {
                   />
 
                   <div className="relative p-7 sm:p-8">
-
                     {/* Top row */}
                     <div className="flex items-start justify-between">
-
                       {/* Icon */}
                       <motion.div
                         whileHover={{
@@ -171,10 +163,7 @@ export function PortalSection() {
                           ${portal.accent.icon}
                         `}
                       >
-                        <Icon
-                          className="h-5 w-5"
-                          strokeWidth={1.8}
-                        />
+                        <Icon className="h-5 w-5" strokeWidth={1.8} />
                       </motion.div>
 
                       {/* Arrow */}
@@ -203,7 +192,6 @@ export function PortalSection() {
 
                     {/* Content */}
                     <div className="mt-8">
-
                       <div className="flex items-center gap-2">
                         <span
                           className={`
@@ -214,33 +202,39 @@ export function PortalSection() {
                           `}
                         />
 
-                        <span className="
+                        <span
+                          className="
                           text-[10px]
                           font-semibold
                           uppercase
                           tracking-[0.18em]
                           text-muted-foreground
-                        ">
+                        "
+                        >
                           {portal.eyebrow}
                         </span>
                       </div>
 
-                      <h3 className="
+                      <h3
+                        className="
                         mt-3
                         text-xl
                         font-semibold
                         tracking-tight
-                      ">
+                      "
+                      >
                         {portal.title}
                       </h3>
 
-                      <p className="
+                      <p
+                        className="
                         mt-3
                         max-w-md
                         text-sm
                         leading-6
                         text-muted-foreground
-                      ">
+                      "
+                      >
                         {portal.description}
                       </p>
                     </div>
@@ -333,7 +327,6 @@ export function PortalSection() {
           "
         >
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-
           One platform. Two perspectives. Smarter infrastructure decisions.
         </motion.div>
       </div>

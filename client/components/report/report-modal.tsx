@@ -1206,8 +1206,8 @@ export function ReportModal({
               )}
 
               {loading
-                ? "Analyzing..."
-                : "Analyze report"}
+                ? "Submitting..."
+                : "Submit Report"}
             </button>
           </div>
         </form>

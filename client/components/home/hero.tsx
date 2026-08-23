@@ -1,7 +1,12 @@
 "use client";
 
 import { motion } from "motion/react";
-import { ArrowRight, CircleAlert, MapPin, ScanSearch } from "lucide-react";
+import {
+  ArrowRight,
+  CircleAlert,
+  MapPin,
+  ScanSearch,
+} from "lucide-react";
 
 import { ScrollLink } from "@/components/ui/scroll-link";
 
@@ -28,22 +33,7 @@ const heroContainer = {
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden border-b border-border bg-background">
-      <div
-        className="
-          pointer-events-none
-          absolute
-          inset-0
-          opacity-[0.035]
-          dark:opacity-[0.06]
-        "
-        style={{
-          backgroundImage:
-            "linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px)",
-          backgroundSize: "48px 48px",
-        }}
-      />
-
+    <section className="relative overflow-hidden bg-transparent">
       <motion.div
         className="
           pointer-events-none
@@ -84,9 +74,11 @@ export function Hero() {
           lg:py-32
         "
       >
-        <motion.div variants={heroContainer} initial="hidden" animate="visible">
-          {/* Eyebrow */}
-
+        <motion.div
+          variants={heroContainer}
+          initial="hidden"
+          animate="visible"
+        >
           <motion.div
             variants={heroItem}
             className="
@@ -118,10 +110,9 @@ export function Hero() {
                 ease: "easeInOut",
               }}
             />
+
             Infrastructure intelligence platform
           </motion.div>
-
-          {/* Heading */}
 
           <motion.h1
             variants={heroItem}
@@ -139,10 +130,10 @@ export function Hero() {
           >
             Smarter roads.
             <br />
-            <span className="text-muted-foreground">Safer communities.</span>
+            <span className="text-muted-foreground">
+              Safer communities.
+            </span>
           </motion.h1>
-
-          {/* Description */}
 
           <motion.p
             variants={heroItem}
@@ -155,16 +146,14 @@ export function Hero() {
               sm:text-lg
             "
           >
-            PaveXa uses computer vision and location intelligence to detect road
-            damage, assess risk, and help authorities prioritize repairs.
+            PaveXa uses computer vision and location intelligence to detect
+            road damage, assess risk, and help authorities prioritize repairs.
           </motion.p>
 
           <motion.div
             variants={heroItem}
             className="mt-9 flex flex-col gap-3 sm:flex-row"
           >
-            {/* Get Started */}
-
             <motion.div
               whileHover={{ y: -2 }}
               whileTap={{ scale: 0.98 }}
@@ -198,6 +187,7 @@ export function Hero() {
                 "
               >
                 Get started
+
                 <motion.span
                   className="inline-flex"
                   whileHover={{ x: 4 }}
@@ -211,8 +201,6 @@ export function Hero() {
                 </motion.span>
               </ScrollLink>
             </motion.div>
-
-            {/* How It Works */}
 
             <motion.div
               whileHover={{ y: -2 }}
@@ -235,13 +223,14 @@ export function Hero() {
                   rounded-md
                   border
                   border-border
-                  bg-background
+                  bg-background/80
                   px-5
                   py-3
                   text-sm
                   font-semibold
                   text-foreground
                   shadow-sm
+                  backdrop-blur-sm
                   transition-all
                   duration-200
                   hover:bg-muted
@@ -250,6 +239,7 @@ export function Hero() {
                 "
               >
                 How it works
+
                 <ArrowRight
                   className="
                     h-4
@@ -300,7 +290,13 @@ export function Hero() {
   );
 }
 
-function TrustItem({ icon, text }: { icon: React.ReactNode; text: string }) {
+function TrustItem({
+  icon,
+  text,
+}: {
+  icon: React.ReactNode;
+  text: string;
+}) {
   return (
     <motion.div
       whileHover={{ y: -2 }}
@@ -337,8 +333,6 @@ function InfrastructurePreview() {
       }}
       className="relative"
     >
-      {/* Main card */}
-
       <motion.div
         whileHover={{
           y: -4,
@@ -360,8 +354,6 @@ function InfrastructurePreview() {
           dark:shadow-black/30
         "
       >
-        {/* Application header */}
-
         <div
           className="
             flex
@@ -392,12 +384,12 @@ function InfrastructurePreview() {
             </span>
           </div>
 
-          <span className="text-[10px] text-muted-foreground">PAVEXA / AI</span>
+          <span className="text-[10px] text-muted-foreground">
+            PAVEXA / AI
+          </span>
         </div>
 
         <div className="relative aspect-4/3 overflow-hidden bg-muted">
-          {/* Roads */}
-
           <div
             className="
               absolute
@@ -434,17 +426,10 @@ function InfrastructurePreview() {
             "
           />
 
-          {/* Blocks */}
-
           <MapBlock className="left-[10%] top-[12%] h-16 w-20" />
-
           <MapBlock className="right-[12%] top-[18%] h-20 w-24" />
-
           <MapBlock className="bottom-[15%] left-[14%] h-20 w-24" />
-
           <MapBlock className="bottom-[10%] right-[15%] h-16 w-20" />
-
-          {/* Detection points */}
 
           <DetectionPoint
             className="left-[35%] top-[32%]"
@@ -463,8 +448,6 @@ function InfrastructurePreview() {
             severity="medium"
             delay={0.8}
           />
-
-          {/* Detection overlay */}
 
           <motion.div
             initial={{
@@ -501,8 +484,6 @@ function InfrastructurePreview() {
               3 road issues identified
             </p>
           </motion.div>
-
-          {/* Animated scan line */}
 
           <motion.div
             className="
@@ -586,8 +567,6 @@ function DetectionPoint({
 
   return (
     <div className={`absolute ${className}`}>
-      {/* Pulse */}
-
       <motion.div
         className={`
           absolute
@@ -607,8 +586,6 @@ function DetectionPoint({
           ease: "easeOut",
         }}
       />
-
-      {/* Point */}
 
       <motion.div
         className={`
@@ -635,7 +612,13 @@ function DetectionPoint({
   );
 }
 
-function Metric({ label, value }: { label: string; value: string }) {
+function Metric({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
   return (
     <motion.div
       whileHover={{
@@ -647,7 +630,9 @@ function Metric({ label, value }: { label: string; value: string }) {
         {label}
       </p>
 
-      <p className="mt-1 text-sm font-semibold">{value}</p>
+      <p className="mt-1 text-sm font-semibold">
+        {value}
+      </p>
     </motion.div>
   );
 }

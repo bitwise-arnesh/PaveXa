@@ -45,13 +45,6 @@ export function AdminLoginForm() {
 
   const onSubmit = async (data: AdminLoginForm) => {
     try {
-      /*
-       * Admin authentication uses the normal
-       * Better Auth email/password flow.
-       *
-       * Authorization is handled separately by
-       * the protected /admin/dashboard route.
-       */
       const { data: session, error } =
         await authClient.signIn.email({
           email: data.email,
@@ -64,17 +57,13 @@ export function AdminLoginForm() {
         toast.error("Unable to sign in", {
           description: getAdminLoginErrorMessage(
             error.message,
-            error.status
+            error.status,
           ),
         });
 
         return;
       }
 
-      /*
-       * Make sure Better Auth actually created
-       * an authenticated session.
-       */
       if (!session) {
         toast.error("Unable to sign in", {
           description:
@@ -84,13 +73,6 @@ export function AdminLoginForm() {
         return;
       }
 
-      /*
-       * Do NOT trust the client to determine whether
-       * this user is an administrator.
-       *
-       * /admin/dashboard must perform the actual
-       * server-side role check.
-       */
       toast.success("Welcome to Command Center", {
         description:
           "You have been signed in successfully.",
@@ -100,7 +82,7 @@ export function AdminLoginForm() {
     } catch (error) {
       console.error(
         "Unexpected admin authentication error:",
-        error
+        error,
       );
 
       toast.error("Something went wrong", {
@@ -108,10 +90,6 @@ export function AdminLoginForm() {
           "The authentication service could not process your request.",
       });
     } finally {
-      /*
-       * Always clear the form after submission,
-       * whether authentication succeeds or fails.
-       */
       reset();
     }
   };
@@ -126,7 +104,7 @@ export function AdminLoginForm() {
       <div>
         <label
           htmlFor="email"
-          className="mb-2 block text-sm font-medium"
+          className="mb-2 block text-sm font-medium text-zinc-950"
         >
           Email
         </label>
@@ -148,25 +126,27 @@ export function AdminLoginForm() {
             w-full
             rounded-md
             border
-            border-input
-            bg-background
+            border-zinc-300
+            bg-white
             px-3
             text-sm
+            text-zinc-950
             outline-none
             transition-all
-            placeholder:text-muted-foreground
-            focus:border-foreground/40
+            placeholder:text-zinc-400
+            focus:border-zinc-500
             focus:ring-2
-            focus:ring-foreground/10
-            aria-invalid:border-destructive
-            aria-invalid:focus:ring-destructive/10
+            focus:ring-zinc-950/10
+            aria-invalid:border-red-500
+            aria-invalid:focus:border-red-500
+            aria-invalid:focus:ring-red-500/10
           "
         />
 
         {errors.email && (
           <p
             id="admin-email-error"
-            className="mt-1.5 text-xs text-destructive"
+            className="mt-1.5 text-xs text-red-600"
           >
             {errors.email.message}
           </p>
@@ -177,7 +157,7 @@ export function AdminLoginForm() {
       <div>
         <label
           htmlFor="password"
-          className="mb-2 block text-sm font-medium"
+          className="mb-2 block text-sm font-medium text-zinc-950"
         >
           Password
         </label>
@@ -204,14 +184,15 @@ export function AdminLoginForm() {
           justify-center
           gap-2
           rounded-md
-          bg-foreground
+          bg-zinc-950
           text-sm
           font-semibold
-          text-background
+          text-white
           shadow-sm
           transition-all
           duration-200
           hover:-translate-y-0.5
+          hover:bg-zinc-800
           hover:shadow-md
           active:translate-y-0
           disabled:pointer-events-none
@@ -240,7 +221,7 @@ export function AdminLoginForm() {
       </button>
 
       {/* Security note */}
-      <p className="text-center text-xs leading-5 text-muted-foreground">
+      <p className="text-center text-xs leading-5 text-zinc-500">
         Authorized PaveXa infrastructure personnel only.
       </p>
     </form>
@@ -250,13 +231,10 @@ export function AdminLoginForm() {
 /**
  * Convert Better Auth errors into safe,
  * user-friendly messages.
- *
- * We intentionally avoid exposing sensitive
- * authentication information.
  */
 function getAdminLoginErrorMessage(
   message?: string,
-  status?: number
+  status?: number,
 ): string {
   const normalized = message?.toLowerCase() ?? "";
 

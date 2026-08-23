@@ -53,6 +53,7 @@ export function RegisterForm() {
     },
   } = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
+
     defaultValues: {
       name: "",
       email: "",
@@ -70,11 +71,16 @@ export function RegisterForm() {
       });
 
       if (error) {
-        console.error("Better Auth registration error:", error);
-        const errorMessage = getRegistrationErrorMessage(
-          error.message,
-          error.status
+        console.error(
+          "Better Auth registration error:",
+          error
         );
+
+        const errorMessage =
+          getRegistrationErrorMessage(
+            error.message,
+            error.status
+          );
 
         toast.error("Unable to create account", {
           description: errorMessage,
@@ -89,14 +95,16 @@ export function RegisterForm() {
 
       router.push("/dashboard");
     } catch (error) {
-      console.error("Unexpected registration error:", error);
+      console.error(
+        "Unexpected registration error:",
+        error
+      );
 
       toast.error("Something went wrong", {
         description:
           "We couldn't create your account. Please try again.",
       });
     } finally {
-
       reset();
     }
   };
@@ -111,7 +119,7 @@ export function RegisterForm() {
       <div>
         <label
           htmlFor="name"
-          className="mb-2 block text-sm font-medium"
+          className="mb-2 block text-sm font-medium text-zinc-950"
         >
           Full name
         </label>
@@ -122,32 +130,35 @@ export function RegisterForm() {
           placeholder="Your name"
           autoComplete="name"
           aria-invalid={!!errors.name}
-          aria-describedby={errors.name ? "name-error" : undefined}
+          aria-describedby={
+            errors.name ? "name-error" : undefined
+          }
           {...register("name")}
           className="
             h-11
             w-full
             rounded-md
             border
-            border-input
-            bg-background
+            border-zinc-300
+            bg-white
             px-3
             text-sm
+            text-zinc-950
             outline-none
             transition-all
-            placeholder:text-muted-foreground
-            focus:border-foreground/40
+            placeholder:text-zinc-400
+            focus:border-zinc-500
             focus:ring-2
-            focus:ring-foreground/10
-            aria-invalid:border-destructive
-            aria-invalid:focus:ring-destructive/10
+            focus:ring-zinc-950/10
+            aria-invalid:border-red-500
+            aria-invalid:focus:ring-red-500/10
           "
         />
 
         {errors.name && (
           <p
             id="name-error"
-            className="mt-1.5 text-xs text-destructive"
+            className="mt-1.5 text-xs text-red-600"
           >
             {errors.name.message}
           </p>
@@ -158,7 +169,7 @@ export function RegisterForm() {
       <div>
         <label
           htmlFor="email"
-          className="mb-2 block text-sm font-medium"
+          className="mb-2 block text-sm font-medium text-zinc-950"
         >
           Email
         </label>
@@ -169,32 +180,35 @@ export function RegisterForm() {
           placeholder="you@example.com"
           autoComplete="email"
           aria-invalid={!!errors.email}
-          aria-describedby={errors.email ? "email-error" : undefined}
+          aria-describedby={
+            errors.email ? "email-error" : undefined
+          }
           {...register("email")}
           className="
             h-11
             w-full
             rounded-md
             border
-            border-input
-            bg-background
+            border-zinc-300
+            bg-white
             px-3
             text-sm
+            text-zinc-950
             outline-none
             transition-all
-            placeholder:text-muted-foreground
-            focus:border-foreground/40
+            placeholder:text-zinc-400
+            focus:border-zinc-500
             focus:ring-2
-            focus:ring-foreground/10
-            aria-invalid:border-destructive
-            aria-invalid:focus:ring-destructive/10
+            focus:ring-zinc-950/10
+            aria-invalid:border-red-500
+            aria-invalid:focus:ring-red-500/10
           "
         />
 
         {errors.email && (
           <p
             id="email-error"
-            className="mt-1.5 text-xs text-destructive"
+            className="mt-1.5 text-xs text-red-600"
           >
             {errors.email.message}
           </p>
@@ -205,7 +219,7 @@ export function RegisterForm() {
       <div>
         <label
           htmlFor="password"
-          className="mb-2 block text-sm font-medium"
+          className="mb-2 block text-sm font-medium text-zinc-950"
         >
           Password
         </label>
@@ -215,7 +229,6 @@ export function RegisterForm() {
           placeholder="At least 8 characters"
           autoComplete="new-password"
           error={errors.password?.message}
-          {...register("password")}
         />
       </div>
 
@@ -223,7 +236,7 @@ export function RegisterForm() {
       <div>
         <label
           htmlFor="confirmPassword"
-          className="mb-2 block text-sm font-medium"
+          className="mb-2 block text-sm font-medium text-zinc-950"
         >
           Confirm password
         </label>
@@ -233,7 +246,6 @@ export function RegisterForm() {
           placeholder="Repeat your password"
           autoComplete="new-password"
           error={errors.confirmPassword?.message}
-          {...register("confirmPassword")}
         />
       </div>
 
@@ -250,14 +262,15 @@ export function RegisterForm() {
           justify-center
           gap-2
           rounded-md
-          bg-foreground
+          bg-zinc-950
           text-sm
           font-semibold
-          text-background
+          text-white
           shadow-sm
           transition-all
           duration-200
           hover:-translate-y-0.5
+          hover:bg-zinc-800
           hover:shadow-md
           active:translate-y-0
           disabled:pointer-events-none
@@ -286,13 +299,14 @@ export function RegisterForm() {
       </button>
 
       {/* Login */}
-      <p className="text-center text-sm text-muted-foreground">
+      <p className="text-center text-sm text-zinc-500">
         Already have an account?{" "}
+
         <Link
           href="/login"
           className="
             font-semibold
-            text-foreground
+            text-zinc-950
             underline-offset-4
             transition-colors
             hover:underline
@@ -305,12 +319,12 @@ export function RegisterForm() {
   );
 }
 
-
 function getRegistrationErrorMessage(
   message?: string,
   status?: number
 ): string {
-  const normalized = message?.toLowerCase() ?? "";
+  const normalized =
+    message?.toLowerCase() ?? "";
 
   if (
     normalized.includes("already exists") ||
@@ -346,5 +360,8 @@ function getRegistrationErrorMessage(
     return "Our authentication service is temporarily unavailable. Please try again in a moment.";
   }
 
-  return message || "Please check your information and try again.";
+  return (
+    message ||
+    "Please check your information and try again."
+  );
 }

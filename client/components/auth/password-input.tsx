@@ -26,18 +26,22 @@ export function PasswordInput({
             w-full
             rounded-md
             border
-            border-input
-            bg-background
+            border-zinc-300
+            bg-white
             px-3
             pr-11
             text-sm
+            text-zinc-950
             outline-none
             transition-all
-            placeholder:text-muted-foreground
-            focus:border-foreground/40
+            placeholder:text-zinc-400
+            focus:border-zinc-500
             focus:ring-2
-            focus:ring-foreground/10
-            ${error ? "border-destructive" : ""}
+            focus:ring-zinc-950/10
+            disabled:cursor-not-allowed
+            disabled:bg-zinc-100
+            disabled:opacity-60
+            ${error ? "border-red-500 focus:border-red-500" : ""}
             ${className}
           `}
         />
@@ -45,7 +49,11 @@ export function PasswordInput({
         <button
           type="button"
           onClick={() => setVisible((value) => !value)}
-          aria-label={visible ? "Hide password" : "Show password"}
+          aria-label={
+            visible
+              ? "Hide password"
+              : "Show password"
+          }
           className="
             absolute
             right-0
@@ -55,9 +63,9 @@ export function PasswordInput({
             w-11
             items-center
             justify-center
-            text-muted-foreground
+            text-zinc-400
             transition-colors
-            hover:text-foreground
+            hover:text-zinc-950
           "
         >
           {visible ? (
@@ -69,7 +77,7 @@ export function PasswordInput({
       </div>
 
       {error && (
-        <p className="mt-1.5 text-xs text-destructive">
+        <p className="mt-1.5 text-xs text-red-600">
           {error}
         </p>
       )}

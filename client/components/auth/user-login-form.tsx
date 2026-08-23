@@ -38,6 +38,7 @@ export function UserLoginForm() {
     },
   } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
+
     defaultValues: {
       email: "",
       password: "",
@@ -58,7 +59,7 @@ export function UserLoginForm() {
         toast.error("Unable to sign in", {
           description: getLoginErrorMessage(
             error.message,
-            error.status
+            error.status,
           ),
         });
 
@@ -75,12 +76,16 @@ export function UserLoginForm() {
       }
 
       toast.success("Welcome back!", {
-        description: "You have been signed in successfully.",
+        description:
+          "You have been signed in successfully.",
       });
 
       router.push("/dashboard");
     } catch (error) {
-      console.error("Unexpected login error:", error);
+      console.error(
+        "Unexpected login error:",
+        error,
+      );
 
       toast.error("Something went wrong", {
         description:
@@ -101,7 +106,7 @@ export function UserLoginForm() {
       <div>
         <label
           htmlFor="email"
-          className="mb-2 block text-sm font-medium"
+          className="mb-2 block text-sm font-medium text-zinc-950"
         >
           Email
         </label>
@@ -113,7 +118,9 @@ export function UserLoginForm() {
           autoComplete="email"
           aria-invalid={!!errors.email}
           aria-describedby={
-            errors.email ? "email-error" : undefined
+            errors.email
+              ? "email-error"
+              : undefined
           }
           {...register("email")}
           className="
@@ -121,25 +128,27 @@ export function UserLoginForm() {
             w-full
             rounded-md
             border
-            border-input
-            bg-background
+            border-zinc-300
+            bg-white
             px-3
             text-sm
+            text-zinc-950
             outline-none
             transition-all
-            placeholder:text-muted-foreground
-            focus:border-foreground/40
+            placeholder:text-zinc-400
+            focus:border-zinc-500
             focus:ring-2
-            focus:ring-foreground/10
-            aria-invalid:border-destructive
-            aria-invalid:focus:ring-destructive/10
+            focus:ring-zinc-950/10
+            aria-invalid:border-red-500
+            aria-invalid:focus:border-red-500
+            aria-invalid:focus:ring-red-500/10
           "
         />
 
         {errors.email && (
           <p
             id="email-error"
-            className="mt-1.5 text-xs text-destructive"
+            className="mt-1.5 text-xs text-red-600"
           >
             {errors.email.message}
           </p>
@@ -151,7 +160,7 @@ export function UserLoginForm() {
         <div className="mb-2 flex items-center justify-between">
           <label
             htmlFor="password"
-            className="text-sm font-medium"
+            className="text-sm font-medium text-zinc-950"
           >
             Password
           </label>
@@ -160,9 +169,9 @@ export function UserLoginForm() {
             href="/forgot-password"
             className="
               text-xs
-              text-muted-foreground
+              text-zinc-500
               transition-colors
-              hover:text-foreground
+              hover:text-zinc-950
               hover:underline
               underline-offset-4
             "
@@ -193,14 +202,15 @@ export function UserLoginForm() {
           justify-center
           gap-2
           rounded-md
-          bg-foreground
+          bg-zinc-950
           text-sm
           font-semibold
-          text-background
+          text-white
           shadow-sm
           transition-all
           duration-200
           hover:-translate-y-0.5
+          hover:bg-zinc-800
           hover:shadow-md
           active:translate-y-0
           disabled:pointer-events-none
@@ -229,13 +239,13 @@ export function UserLoginForm() {
       </button>
 
       {/* Register */}
-      <p className="text-center text-sm text-muted-foreground">
+      <p className="text-center text-sm text-zinc-500">
         Don&apos;t have an account?{" "}
         <Link
           href="/register"
           className="
             font-semibold
-            text-foreground
+            text-zinc-950
             underline-offset-4
             transition-colors
             hover:underline
@@ -250,9 +260,10 @@ export function UserLoginForm() {
 
 function getLoginErrorMessage(
   message?: string,
-  status?: number
+  status?: number,
 ): string {
-  const normalized = message?.toLowerCase() ?? "";
+  const normalized =
+    message?.toLowerCase() ?? "";
 
   if (
     normalized.includes("invalid") ||

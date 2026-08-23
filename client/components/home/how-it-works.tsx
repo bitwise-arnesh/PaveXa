@@ -59,16 +59,9 @@ export function HowItWorks() {
   return (
     <section
       id="how-it-works"
-      className="relative overflow-hidden border-b border-border bg-background text-foreground"
+      className="relative overflow-hidden bg-transparent text-foreground"
     >
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.025] dark:opacity-[0.04]"
-        style={{
-          backgroundImage:
-            "linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px)",
-          backgroundSize: "48px 48px",
-        }}
-      />
+      
 
       <div className="relative mx-auto max-w-6xl px-6 py-24 lg:py-32">
         <motion.div

@@ -11,7 +11,7 @@ export default function HomePage() {
     <>
       <Navbar />
 
-      <main>
+      <main className="landing-page">
         <Hero />
         <PortalSection />
         <HowItWorks />

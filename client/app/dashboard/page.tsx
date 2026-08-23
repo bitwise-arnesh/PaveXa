@@ -13,6 +13,7 @@ import { DeleteReportButton } from "@/components/report/delete-report-button";
 import { db } from "@/db";
 import { report } from "@/db/schemas/schema";
 import { desc, eq } from "drizzle-orm";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default async function DashboardPage() {
   const session = await requireSession();
@@ -33,8 +34,6 @@ export default async function DashboardPage() {
     (item) => item.status === "RESOLVED",
   ).length;
 
-  // Show all reports.
-  // The report list itself is scrollable.
   const recentReports = reports;
 
   return (
@@ -57,7 +56,10 @@ export default async function DashboardPage() {
             </p>
           </div>
 
-          <ReportButton />
+          <div className="flex items-center gap-4">
+            <ThemeToggle />
+            <ReportButton />
+          </div>
         </div>
 
         {/* Stats */}
@@ -175,16 +177,22 @@ export default async function DashboardPage() {
                         className={
                           item.status === "RESOLVED"
                             ? "hidden rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 sm:inline-block"
-                            : "hidden rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-600 dark:text-amber-400 sm:inline-block"
+                            : item.status === "IN_PROGRESS"
+                              ? "hidden rounded-full bg-blue-500/10 px-2.5 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 sm:inline-block"
+                              : "hidden rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-600 dark:text-amber-400 sm:inline-block"
                         }
                       >
                         {item.status.replaceAll("_", " ")}
                       </span>
 
-                      {/* Delete */}
-                      <DeleteReportButton
-                        reportId={item.id}
-                      />
+                      {/* Delete
+                          Only UNDER_REVIEW reports can be deleted.
+                      */}
+                      {item.status === "UNDER_REVIEW" && (
+                        <DeleteReportButton
+                          reportId={item.id}
+                        />
+                      )}
                     </div>
                   </div>
                 ))
